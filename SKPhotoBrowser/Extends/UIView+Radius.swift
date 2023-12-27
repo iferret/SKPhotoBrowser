@@ -9,7 +9,13 @@
 import UIKit
 
 extension UIView {
-    func addCornerRadiusAnimation(_ from: CGFloat, to: CGFloat, duration: CFTimeInterval) {
+    
+    /// addCornerRadiusAnimation
+    /// - Parameters:
+    ///   - from: CGFloat
+    ///   - to: CGFloat
+    ///   - duration: CFTimeInterval
+    internal func addCornerRadiusAnimation(_ from: CGFloat, to: CGFloat, duration: CFTimeInterval) {
         let animation = CABasicAnimation(keyPath: "cornerRadius")
         animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
         animation.fromValue = from

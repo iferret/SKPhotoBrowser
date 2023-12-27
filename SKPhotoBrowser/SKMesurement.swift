@@ -9,24 +9,35 @@
 import Foundation
 import UIKit
 
+/// SKMesurement
 struct SKMesurement {
+    
+    /// Bool
     static let isPhone: Bool = UIDevice.current.userInterfaceIdiom == .phone
+    
+    /// Bool
     static let isPad: Bool = UIDevice.current.userInterfaceIdiom == .pad
-    static var statusBarH: CGFloat {
-        return UIApplication.shared.statusBarFrame.height
-    }
+    
+    /// CGFloat
+    static var statusBarH: CGFloat { UIApplication.shared.statusBarFrame.height }
+    
+    /// CGFloat
     static var screenHeight: CGFloat {
         return UIApplication.shared.preferredApplicationWindow?.bounds.height ?? UIScreen.main.bounds.height
     }
+    
+    /// CGFloat
     static var screenWidth: CGFloat {
         return UIApplication.shared.preferredApplicationWindow?.bounds.width ?? UIScreen.main.bounds.width
     }
-    static var screenScale: CGFloat {
-        return UIScreen.main.scale
-    }
-    static var screenRatio: CGFloat {
-        return screenWidth / screenHeight
-    }
+    
+    /// CGFloat
+    static var screenScale: CGFloat { UIScreen.main.scale  }
+    
+    /// CGFloat
+    static var screenRatio: CGFloat { screenWidth / screenHeight }
+    
+    /// Bool
     static var isPhoneX: Bool {
         let iPhoneXHeights: [CGFloat] = [2436, 2688, 1792]
         if isPhone, iPhoneXHeights.contains(UIScreen.main.nativeBounds.height) {

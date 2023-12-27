@@ -8,12 +8,15 @@
 
 import UIKit
 
+/// SKZoomingScrollView
 open class SKZoomingScrollView: UIScrollView {
-    var captionView: SKCaptionView!
-    var photo: SKPhotoProtocol! {
+    /// Optional<SKCaptionView>
+    internal var captionView: Optional<SKCaptionView> = .none
+    /// Optional<SKPhotoProtocol>
+    internal var photo: Optional<SKPhotoProtocol> = .none {
         didSet {
-            imageView.image = nil
-            if photo != nil && photo.underlyingImage != nil {
+            imageView?.image = nil
+            if let photo = photo, photo.underlyingImage != nil {
                 displayImage(complete: true)
                 return
             }
@@ -23,23 +26,34 @@ open class SKZoomingScrollView: UIScrollView {
         }
     }
     
-    fileprivate weak var browser: SKPhotoBrowser?
+    /// SKPhotoBrowser
+    fileprivate weak var browser: Optional<SKPhotoBrowser> = .none
+    /// Optional<SKDetectingImageView>
+    fileprivate(set) var imageView: Optional<SKDetectingImageView> = .none
+    /// Optional<SKDetectingView>
+    fileprivate var tapView: Optional<SKDetectingView> = .none
+    /// Optional<SKIndicatorView>
+    fileprivate var indicatorView: Optional<SKIndicatorView> = .none
     
-    fileprivate(set) var imageView: SKDetectingImageView!
-    fileprivate var tapView: SKDetectingView!
-    fileprivate var indicatorView: SKIndicatorView!
-    
-    required public init?(coder aDecoder: NSCoder) {
+    /// 构建
+    /// - Parameter aDecoder: NSCoder
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setup()
     }
     
-    override init(frame: CGRect) {
+    /// 构建
+    /// - Parameter frame: CGRect
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
     }
     
-    convenience init(frame: CGRect, browser: SKPhotoBrowser) {
+    /// 构建
+    /// - Parameters:
+    ///   - frame: CGRect
+    ///   - browser: SKPhotoBrowser
+    public convenience init(frame: CGRect, browser: SKPhotoBrowser) {
         self.init(frame: frame)
         self.browser = browser
         setup()
@@ -49,24 +63,25 @@ open class SKZoomingScrollView: UIScrollView {
         browser = nil
     }
     
-    func setup() {
+    /// setup
+    internal func setup() {
         // tap
         tapView = SKDetectingView(frame: bounds)
-        tapView.delegate = self
-        tapView.backgroundColor = .clear
-        tapView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-        addSubview(tapView)
+        tapView!.delegate = self
+        tapView!.backgroundColor = .clear
+        tapView!.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+        addSubview(tapView!)
         
         // image
         imageView = SKDetectingImageView(frame: frame)
-        imageView.delegate = self
-        imageView.contentMode = .bottom
-        imageView.backgroundColor = .clear
-        addSubview(imageView)
+        imageView!.delegate = self
+        imageView!.contentMode = .bottom
+        imageView!.backgroundColor = .clear
+        addSubview(imageView!)
         
         // indicator
         indicatorView = SKIndicatorView(frame: frame)
-        addSubview(indicatorView)
+        addSubview(indicatorView!)
         
         // self
         backgroundColor = .clear
@@ -78,14 +93,14 @@ open class SKZoomingScrollView: UIScrollView {
     
     // MARK: - override
     
+    /// layoutSubviews
     open override func layoutSubviews() {
-        tapView.frame = bounds
-        indicatorView.frame = bounds
-        
+        tapView?.frame = bounds
+        indicatorView?.frame = bounds
         super.layoutSubviews()
         
         let boundsSize = bounds.size
-        var frameToCenter = imageView.frame
+        var frameToCenter = imageView?.frame ?? .zero
         
         // horizon
         if frameToCenter.size.width < boundsSize.width {
@@ -101,11 +116,12 @@ open class SKZoomingScrollView: UIScrollView {
         }
         
         // Center
-        if !imageView.frame.equalTo(frameToCenter) {
-            imageView.frame = frameToCenter
+        if imageView?.frame.equalTo(frameToCenter) == false {
+            imageView?.frame = frameToCenter
         }
     }
     
+    /// setMaxMinZoomScalesForCurrentBounds
     open func setMaxMinZoomScalesForCurrentBounds() {
         maximumZoomScale = 1
         minimumZoomScale = 1
@@ -161,18 +177,21 @@ open class SKZoomingScrollView: UIScrollView {
         setNeedsLayout()
     }
     
+    /// prepareForReuse
     open func prepareForReuse() {
         photo = nil
         if captionView != nil {
-            captionView.removeFromSuperview()
+            captionView?.removeFromSuperview()
             captionView = nil
         }
     }
     
+    /// displayImage
+    /// - Parameter image: UIImage
     open func displayImage(_ image: UIImage) {
         // image
-        imageView.image = image
-        imageView.contentMode = photo.contentMode
+        imageView?.image = image
+        imageView?.contentMode = photo?.contentMode ?? .scaleAspectFit
         
         var imageViewFrame: CGRect = .zero
         imageViewFrame.origin = .zero
@@ -183,47 +202,53 @@ open class SKZoomingScrollView: UIScrollView {
         } else {
             imageViewFrame.size = image.size
         }
-        imageView.frame = imageViewFrame
+        imageView?.frame = imageViewFrame
         
         contentSize = imageViewFrame.size
         setMaxMinZoomScalesForCurrentBounds()
     }
     
     // MARK: - image
+    
+    /// displayImage
+    /// - Parameter flag: Bool
     open func displayImage(complete flag: Bool) {
         // reset scale
         maximumZoomScale = 1
         minimumZoomScale = 1
         zoomScale = 1
         
-        if !flag {
-            if photo.underlyingImage == nil {
-                indicatorView.startAnimating()
+        if flag == false {
+            if photo?.underlyingImage == nil {
+                indicatorView?.startAnimating()
             }
-            photo.loadUnderlyingImageAndNotify()
+            photo?.loadUnderlyingImageAndNotify()
         } else {
-            indicatorView.stopAnimating()
+            indicatorView?.stopAnimating()
         }
         
-        if let image = photo.underlyingImage, photo != nil {
+        if let image = photo?.underlyingImage, photo != nil {
             displayImage(image)
-		    } else {
-			    // change contentSize will reset contentOffset, so only set the contentsize zero when the image is nil
-			    contentSize = CGSize.zero
-		    }
+        } else {
+            // change contentSize will reset contentOffset, so only set the contentsize zero when the image is nil
+            contentSize = CGSize.zero
+        }
         setNeedsLayout()
     }
     
+    /// displayImageFailure
     open func displayImageFailure() {
-        indicatorView.stopAnimating()
+        indicatorView?.stopAnimating()
     }
     
     // MARK: - handle tap
+    
+    /// handleDoubleTap
+    /// - Parameter touchPoint: CGPoint
     open func handleDoubleTap(_ touchPoint: CGPoint) {
         if let browser = browser {
             NSObject.cancelPreviousPerformRequests(withTarget: browser)
         }
-        
         if zoomScale > minimumZoomScale {
             // zoom out
             setZoomScale(minimumZoomScale, animated: true)
@@ -238,23 +263,31 @@ open class SKZoomingScrollView: UIScrollView {
             let zoomRect = zoomRectForScrollViewWith(maximumZoomScale, touchPoint: touchPoint)
             zoom(to: zoomRect, animated: true)
         }
-        
         // delay control
         browser?.hideControlsAfterDelay()
     }
 }
 
 // MARK: - UIScrollViewDelegate
-
 extension SKZoomingScrollView: UIScrollViewDelegate {
+    
+    /// viewForZooming
+    /// - Parameter scrollView: UIScrollView
+    /// - Returns: UIView
     public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
     }
     
+    /// scrollViewWillBeginZooming
+    /// - Parameters:
+    ///   - scrollView: UIScrollView
+    ///   - view: UIView
     public func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
         browser?.cancelControlHiding()
     }
     
+    /// scrollViewDidZoom
+    /// - Parameter scrollView: UIScrollView
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
         setNeedsLayout()
         layoutIfNeeded()
@@ -264,14 +297,14 @@ extension SKZoomingScrollView: UIScrollViewDelegate {
 // MARK: - SKDetectingImageViewDelegate
 
 extension SKZoomingScrollView: SKDetectingViewDelegate {
-    func handleSingleTap(_ view: UIView, touch: UITouch) {
-        guard let browser = browser else {
-            return
-        }
-        guard SKPhotoBrowserOptions.enableZoomBlackArea == true else {
-            return
-        }
-        
+    
+    /// handleSingleTap
+    /// - Parameters:
+    ///   - view: UIView
+    ///   - touch: UITouch
+    internal func handleSingleTap(_ view: UIView, touch: UITouch) {
+        guard let browser = browser else { return }
+        guard SKPhotoBrowserOptions.enableZoomBlackArea == true else { return }
         if browser.areControlsHidden() == false && SKPhotoBrowserOptions.enableSingleTapDismiss == true {
             browser.determineAndClose()
         } else {
@@ -279,7 +312,11 @@ extension SKZoomingScrollView: SKDetectingViewDelegate {
         }
     }
     
-    func handleDoubleTap(_ view: UIView, touch: UITouch) {
+    /// handleDoubleTap
+    /// - Parameters:
+    ///   - view: UIView
+    ///   - touch: UITouch
+    internal func handleDoubleTap(_ view: UIView, touch: UITouch) {
         if SKPhotoBrowserOptions.enableZoomBlackArea == true {
             let needPoint = getViewFramePercent(view, touch: touch)
             handleDoubleTap(needPoint)
@@ -290,10 +327,11 @@ extension SKZoomingScrollView: SKDetectingViewDelegate {
 // MARK: - SKDetectingImageViewDelegate
 
 extension SKZoomingScrollView: SKDetectingImageViewDelegate {
-    func handleImageViewSingleTap(_ touchPoint: CGPoint) {
-        guard let browser = browser else {
-            return
-        }
+    
+    /// handleImageViewSingleTap
+    /// - Parameter touchPoint: CGPoint
+    internal func handleImageViewSingleTap(_ touchPoint: CGPoint) {
+        guard let browser = browser else { return }
         if SKPhotoBrowserOptions.enableSingleTapDismiss {
             browser.determineAndClose()
         } else {
@@ -301,18 +339,26 @@ extension SKZoomingScrollView: SKDetectingImageViewDelegate {
         }
     }
     
-    func handleImageViewDoubleTap(_ touchPoint: CGPoint) {
+    /// handleImageViewDoubleTap
+    /// - Parameter touchPoint: CGPoint
+    internal func handleImageViewDoubleTap(_ touchPoint: CGPoint) {
         handleDoubleTap(touchPoint)
     }
 }
 
-private extension SKZoomingScrollView {
-    func getViewFramePercent(_ view: UIView, touch: UITouch) -> CGPoint {
+extension SKZoomingScrollView {
+    
+    /// getViewFramePercent
+    /// - Parameters:
+    ///   - view: UIView
+    ///   - touch: UITouch
+    /// - Returns: CGPoint
+    private func getViewFramePercent(_ view: UIView, touch: UITouch) -> CGPoint {
         let oneWidthViewPercent = view.bounds.width / 100
         let viewTouchPoint = touch.location(in: view)
         let viewWidthTouch = viewTouchPoint.x
         let viewPercentTouch = viewWidthTouch / oneWidthViewPercent
-        let photoWidth = imageView.bounds.width
+        let photoWidth: CGFloat = imageView?.bounds.width ?? 0
         let onePhotoPercent = photoWidth / 100
         let needPoint = viewPercentTouch * onePhotoPercent
         
@@ -321,18 +367,22 @@ private extension SKZoomingScrollView {
         if viewTouchPoint.y < view.bounds.height / 2 {
             Y = 0
         } else {
-            Y = imageView.bounds.height
+            Y = imageView?.bounds.height ?? 0
         }
         let allPoint = CGPoint(x: needPoint, y: Y)
         return allPoint
     }
     
-    func zoomRectForScrollViewWith(_ scale: CGFloat, touchPoint: CGPoint) -> CGRect {
+    /// CGPoint
+    /// - Parameters:
+    ///   - scale: CGFloat
+    ///   - touchPoint: CGPoint
+    /// - Returns: CGRect
+    private func zoomRectForScrollViewWith(_ scale: CGFloat, touchPoint: CGPoint) -> CGRect {
         let w = frame.size.width / scale
         let h = frame.size.height / scale
         let x = touchPoint.x - (h / max(SKMesurement.screenScale, 2.0))
         let y = touchPoint.y - (w / max(SKMesurement.screenScale, 2.0))
-        
         return CGRect(x: x, y: y, width: w, height: h)
     }
 }

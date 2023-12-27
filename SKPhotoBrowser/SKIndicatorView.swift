@@ -8,12 +8,18 @@
 
 import UIKit
 
+/// SKIndicatorView
 class SKIndicatorView: UIActivityIndicatorView {
-    required init(coder aDecoder: NSCoder) {
+    
+    /// 构建
+    /// - Parameter aDecoder: NSCoder
+    internal required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
-    override init(frame: CGRect) {
+    /// 构建
+    /// - Parameter frame: CGRect
+    internal override init(frame: CGRect) {
         super.init(frame: frame)
         center = CGPoint(x: frame.width / 2, y: frame.height / 2)
         style = SKPhotoBrowserOptions.indicatorStyle

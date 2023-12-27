@@ -9,27 +9,41 @@
 import UIKit
 
 class SKPaginationView: UIView {
-    var counterLabel: UILabel?
-    var prevButton: UIButton?
-    var nextButton: UIButton?
-    private var margin: CGFloat = 100
+    
+    /// Optional<UILabel>
+    internal var counterLabel: Optional<UILabel> = .none
+    /// Optional<UIButton>
+    internal var prevButton: Optional<UIButton> = .none
+    /// Optional<UIButton>
+    internal var nextButton: Optional<UIButton> = .none
+    /// CGFloat
+    private var margin: CGFloat = 100.0
+    /// CGFloat
     private var extraMargin: CGFloat = SKMesurement.isPhoneX ? 40 : 0
+    //// SKPhotoBrowser
+    fileprivate weak var browser: Optional<SKPhotoBrowser> = .none
     
-    fileprivate weak var browser: SKPhotoBrowser?
-    
-    required init?(coder aDecoder: NSCoder) {
+    /// 构建
+    /// - Parameter aDecoder: NSCoder
+    internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
-    override init(frame: CGRect) {
+    /// 构建
+    /// - Parameter frame: CGRect
+    internal override init(frame: CGRect) {
         super.init(frame: frame)
     }
     
-    convenience init(frame: CGRect, browser: SKPhotoBrowser?) {
+    /// 构建
+    /// - Parameters:
+    ///   - frame: CGRect
+    ///   - browser: SKPhotoBrowser
+    internal convenience init(frame: CGRect, browser: Optional<SKPhotoBrowser>) {
         self.init(frame: frame)
         self.frame = CGRect(x: 0, y: frame.height - margin - extraMargin, width: frame.width, height: 100)
         self.browser = browser
-
+        
         setupApperance()
         setupCounterLabel()
         setupPrevButton()
@@ -38,7 +52,12 @@ class SKPaginationView: UIView {
         update(browser?.currentPageIndex ?? 0)
     }
     
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+    /// hitTest
+    /// - Parameters:
+    ///   - point: CGPoint
+    ///   - event: UIEvent
+    /// - Returns: UIView
+    internal override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if let view = super.hitTest(point, with: event) {
             if let counterLabel = counterLabel, counterLabel.frame.contains(point) {
                 return view
@@ -52,11 +71,15 @@ class SKPaginationView: UIView {
         return nil
     }
     
-    func updateFrame(frame: CGRect) {
+    /// updateFrame
+    /// - Parameter frame: CGRect
+    internal func updateFrame(frame: CGRect) {
         self.frame = CGRect(x: 0, y: frame.height - margin, width: frame.width, height: 100)
     }
     
-    func update(_ currentPageIndex: Int) {
+    /// update
+    /// - Parameter currentPageIndex: Int
+    internal func update(_ currentPageIndex: Int) {
         guard let browser = browser else { return }
         
         if browser.photos.count > 1 {
@@ -70,24 +93,27 @@ class SKPaginationView: UIView {
         nextButton.isEnabled = (currentPageIndex < browser.photos.count - 1)
     }
     
-    func setControlsHidden(hidden: Bool) {
-        let alpha: CGFloat = hidden ? 0.0 : 1.0
-        
-        UIView.animate(withDuration: 0.35,
-                       animations: { () -> Void in self.alpha = alpha },
-                       completion: nil)
+    /// setControlsHidden
+    /// - Parameter hidden: Bool
+    internal func setControlsHidden(hidden: Bool) {
+        // animate
+        UIView.animate(withDuration: 0.35) {
+            self.alpha = hidden == true ? 0.0 : 1.0
+        }
     }
 }
 
-private extension SKPaginationView {
-    func setupApperance() {
+extension SKPaginationView {
+    
+    /// setupApperance
+    private func setupApperance() {
         backgroundColor = .clear
         clipsToBounds = true
     }
     
-    func setupCounterLabel() {
+    /// setupCounterLabel
+    private func setupCounterLabel() {
         guard SKPhotoBrowserOptions.displayCounterLabel else { return }
-        
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
         label.center = CGPoint(x: frame.width / 2, y: frame.height / 2)
         label.textAlignment = .center
@@ -97,15 +123,13 @@ private extension SKPaginationView {
         label.font = SKToolbarOptions.font
         label.textColor = SKToolbarOptions.textColor
         label.translatesAutoresizingMaskIntoConstraints = true
-        label.autoresizingMask = [.flexibleBottomMargin,
-                                  .flexibleLeftMargin,
-                                  .flexibleRightMargin,
-                                  .flexibleTopMargin]
+        label.autoresizingMask = [.flexibleBottomMargin, .flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin]
         addSubview(label)
         counterLabel = label
     }
     
-    func setupPrevButton() {
+    /// setupPrevButton
+    private func setupPrevButton() {
         guard SKPhotoBrowserOptions.displayBackAndForwardButton else { return }
         guard browser?.photos.count ?? 0 > 1 else { return }
         
@@ -116,7 +140,8 @@ private extension SKPaginationView {
         prevButton = button
     }
     
-    func setupNextButton() {
+    /// setupNextButton
+    private func setupNextButton() {
         guard SKPhotoBrowserOptions.displayBackAndForwardButton else { return }
         guard browser?.photos.count ?? 0 > 1 else { return }
         
@@ -128,42 +153,59 @@ private extension SKPaginationView {
     }
 }
 
+/// setupNextButton
 class SKPaginationButton: UIButton {
-    let insets: UIEdgeInsets = UIEdgeInsets(top: 13.25, left: 17.25, bottom: 13.25, right: 17.25)
     
-    func setup(_ imageName: String) {
+    /// UIEdgeInsets
+    internal let insets: UIEdgeInsets = .init(top: 13.25, left: 17.25, bottom: 13.25, right: 17.25)
+    
+    /// setup
+    /// - Parameter imageName: String
+    internal func setup(_ imageName: String) {
         backgroundColor = .clear
         imageEdgeInsets = insets
         translatesAutoresizingMaskIntoConstraints = true
-        autoresizingMask = [.flexibleBottomMargin,
-                            .flexibleLeftMargin,
-                            .flexibleRightMargin,
-                            .flexibleTopMargin]
+        autoresizingMask = [.flexibleBottomMargin, .flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin]
         contentMode = .center
-
         setImage(UIImage.bundledImage(named: imageName), for: .normal)
     }
 }
 
+/// SKPrevButton
 class SKPrevButton: SKPaginationButton {
-    let imageName = "btn_common_back_wh"
-    required init?(coder aDecoder: NSCoder) {
+    
+    /// String
+    internal let imageName: String = "btn_common_back_wh"
+    
+    /// 构建
+    /// - Parameter aDecoder: NSCoder
+    internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
-    override init(frame: CGRect) {
+    /// 构建
+    /// - Parameter frame: CGRect
+    internal override init(frame: CGRect) {
         super.init(frame: CGRect(x: 0, y: 0, width: 44, height: 44))
         setup(imageName)
     }
 }
 
+/// SKNextButton
 class SKNextButton: SKPaginationButton {
-    let imageName = "btn_common_forward_wh"
-    required init?(coder aDecoder: NSCoder) {
+    
+    /// String
+    internal let imageName: String = "btn_common_forward_wh"
+    
+    /// 构建
+    /// - Parameter aDecoder: NSCoder
+    internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
-    override init(frame: CGRect) {
+    /// 构建
+    /// - Parameter frame: CGRect
+    internal override init(frame: CGRect) {
         super.init(frame: CGRect(x: 0, y: 0, width: 44, height: 44))
         setup(imageName)
     }

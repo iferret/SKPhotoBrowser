@@ -9,50 +9,70 @@
 import UIKit
 
 class SKButton: UIButton {
-    internal var showFrame: CGRect!
-    internal var hideFrame: CGRect!
     
+    /// CGRect
+    internal var showFrame: CGRect = .zero
+    /// CGRect
+    internal var hideFrame: CGRect = .zero
+    /// UIEdgeInsets
     fileprivate var insets: UIEdgeInsets {
         if SKMesurement.isPhone {
-            return UIEdgeInsets(top: 15.25, left: 15.25, bottom: 15.25, right: 15.25)
+            return UIEdgeInsets(top: 14.0, left: 14.0, bottom: 14.0, right: 14.0)
         } else {
-            return UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+            return UIEdgeInsets(top: 12.0, left: 12.0, bottom: 12.0, right: 12.0)
         }
     }
-    fileprivate let size: CGSize = CGSize(width: 44, height: 44)
-    fileprivate var marginX: CGFloat = 0
-    fileprivate var marginY: CGFloat = 0
-    fileprivate var extraMarginY: CGFloat = 20 //NOTE: dynamic to static 
     
-    func setup(_ imageName: String) {
+    /// CGSize
+    fileprivate let size: CGSize = CGSize(width: 44.0, height: 44.0)
+    /// CGFloat
+    fileprivate var marginX: CGFloat = 0.0
+    /// CGFloat
+    fileprivate var marginY: CGFloat = 0.0
+    /// CGFloat
+    fileprivate var extraMarginY: CGFloat = 20.0 //NOTE: dynamic to static
+    
+    /// setup
+    /// - Parameter imageName: String
+    internal func setup(_ imageName: String) {
         backgroundColor = .clear
         imageEdgeInsets = insets
         translatesAutoresizingMaskIntoConstraints = true
         autoresizingMask = [.flexibleBottomMargin, .flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin]
-        
         setImage(UIImage.bundledImage(named: imageName), for: .normal)
     }
-  
-    func setFrameSize(_ size: CGSize? = nil) {
+    
+    /// setFrameSize
+    /// - Parameter size: CGSize
+    internal func setFrameSize(_ size: Optional<CGSize> = .none) {
         guard let size = size else { return }
-        
         let newRect = CGRect(x: marginX, y: marginY, width: size.width, height: size.height)
         frame = newRect
         showFrame = newRect
         hideFrame = CGRect(x: marginX, y: -marginY, width: size.width, height: size.height)
     }
     
-    func updateFrame(_ frameSize: CGSize) { }
+    /// updateFrame
+    /// - Parameter frameSize: CGSize
+    internal func updateFrame(_ frameSize: CGSize) {
+        
+    }
 }
 
 class SKImageButton: SKButton {
+    
+    /// String
     fileprivate var imageName: String { return "" }
-
-    required init?(coder aDecoder: NSCoder) {
+    
+    /// 构建
+    /// - Parameter aDecoder: NSCoder
+    internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
-    override init(frame: CGRect) {
+    /// 构建
+    /// - Parameter frame: CGRect
+    internal override init(frame: CGRect) {
         super.init(frame: frame)
         setup(imageName)
         showFrame = CGRect(x: marginX, y: marginY, width: size.width, height: size.height)
@@ -61,25 +81,37 @@ class SKImageButton: SKButton {
 }
 
 class SKCloseButton: SKImageButton {
-    override var imageName: String { return "btn_common_close_wh" }
-    override var marginX: CGFloat {
+    
+    /// String
+    internal override var imageName: String { return "btn_common_close_wh" }
+    
+    /// CGFloat
+    internal override var marginX: CGFloat {
         get {
-            return SKPhotoBrowserOptions.swapCloseAndDeleteButtons
-                ? SKMesurement.screenWidth - SKButtonOptions.closeButtonPadding.x - self.size.width
-                : SKButtonOptions.closeButtonPadding.x
+            if SKPhotoBrowserOptions.swapCloseAndDeleteButtons {
+                return SKMesurement.screenWidth - SKButtonOptions.closeButtonPadding.x - self.size.width
+            } else {
+                return SKButtonOptions.closeButtonPadding.x
+            }
         }
         set { super.marginX = newValue }
     }
-    override var marginY: CGFloat {
-        get { return SKButtonOptions.closeButtonPadding.y + extraMarginY }
+    
+    /// CGFloat
+    internal override var marginY: CGFloat {
+        get { SKButtonOptions.closeButtonPadding.y + extraMarginY }
         set { super.marginY = newValue }
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    /// 构建
+    /// - Parameter aDecoder: NSCoder
+    internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
-    override init(frame: CGRect) {
+    /// 构建
+    /// - Parameter frame: CGRect
+    internal override init(frame: CGRect) {
         super.init(frame: frame)
         setup(imageName)
         showFrame = CGRect(x: marginX, y: marginY, width: size.width, height: size.height)
@@ -88,25 +120,35 @@ class SKCloseButton: SKImageButton {
 }
 
 class SKDeleteButton: SKImageButton {
-    override var imageName: String { return "btn_common_delete_wh" }
-    override var marginX: CGFloat {
+    
+    /// String
+    internal override var imageName: String { return "btn_common_delete_wh" }
+    /// CGFloat
+    internal override var marginX: CGFloat {
         get {
-            return SKPhotoBrowserOptions.swapCloseAndDeleteButtons
-                ? SKButtonOptions.deleteButtonPadding.x
-                : SKMesurement.screenWidth - SKButtonOptions.deleteButtonPadding.x - self.size.width
+            if SKPhotoBrowserOptions.swapCloseAndDeleteButtons == true {
+                return SKButtonOptions.deleteButtonPadding.x
+            } else {
+                return SKMesurement.screenWidth - SKButtonOptions.deleteButtonPadding.x - self.size.width
+            }
         }
         set { super.marginX = newValue }
     }
-    override var marginY: CGFloat {
-        get { return SKButtonOptions.deleteButtonPadding.y + extraMarginY }
+    /// CGFloat
+    internal override var marginY: CGFloat {
+        get { SKButtonOptions.deleteButtonPadding.y + extraMarginY }
         set { super.marginY = newValue }
     }
-
-    required init?(coder aDecoder: NSCoder) {
+    
+    /// 构建
+    /// - Parameter aDecoder: NSCoder
+    internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-
-    override init(frame: CGRect) {
+    
+    /// 构建
+    /// - Parameter frame: CGRect
+    internal override init(frame: CGRect) {
         super.init(frame: frame)
         setup(imageName)
         showFrame = CGRect(x: marginX, y: marginY, width: size.width, height: size.height)

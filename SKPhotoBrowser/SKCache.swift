@@ -9,85 +9,103 @@
 import UIKit
 
 open class SKCache {
-    public static let sharedCache = SKCache()
+    /// SKCache
+    public static let sharedCache: SKCache = .init()
+    /// SKCacheable
     open var imageCache: SKCacheable
-
+    
+    /// 构建
     init() {
         self.imageCache = SKDefaultImageCache()
     }
-
-    open func imageForKey(_ key: String) -> UIImage? {
-        guard let cache = imageCache as? SKImageCacheable else {
-            return nil
-        }
-        
+    
+    /// imageForKey
+    /// - Parameter key: String
+    /// - Returns: UIImage
+    open func imageForKey(_ key: String) -> Optional<UIImage> {
+        guard let cache = imageCache as? SKImageCacheable else { return .none }
         return cache.imageForKey(key)
     }
-
+    
+    /// setImage
+    /// - Parameters:
+    ///   - image: UIImage
+    ///   - key: String
     open func setImage(_ image: UIImage, forKey key: String) {
-        guard let cache = imageCache as? SKImageCacheable else {
-            return
-        }
-        
+        guard let cache = imageCache as? SKImageCacheable else { return }
         cache.setImage(image, forKey: key)
     }
-
+    
+    /// removeImageForKey
+    /// - Parameter key: String
     open func removeImageForKey(_ key: String) {
-        guard let cache = imageCache as? SKImageCacheable else {
-            return
-        }
-        
+        guard let cache = imageCache as? SKImageCacheable else { return }
         cache.removeImageForKey(key)
     }
     
+    /// removeAllImages
     open func removeAllImages() {
-        guard let cache = imageCache as? SKImageCacheable else {
-            return
-        }
-        
+        guard let cache = imageCache as? SKImageCacheable else { return }
         cache.removeAllImages()
     }
-
-    open func imageForRequest(_ request: URLRequest) -> UIImage? {
-        guard let cache = imageCache as? SKRequestResponseCacheable else {
-            return nil
-        }
-        
+    
+    /// imageForRequest
+    /// - Parameter request: URLRequest
+    /// - Returns: Optional<UIImage>
+    open func imageForRequest(_ request: URLRequest) -> Optional<UIImage> {
+        guard let cache = imageCache as? SKRequestResponseCacheable else { return .none }
         if let response = cache.cachedResponseForRequest(request) {
             return UIImage(data: response.data)
         }
-        return nil
+        return .none
     }
-
-    open func setImageData(_ data: Data, response: URLResponse, request: URLRequest?) {
-        guard let cache = imageCache as? SKRequestResponseCacheable, let request = request else {
-            return
-        }
+    
+    /// setImageData
+    /// - Parameters:
+    ///   - data: Data
+    ///   - response: URLResponse
+    ///   - request:  Optional<URLRequest>
+    open func setImageData(_ data: Data, response: URLResponse, request: Optional<URLRequest>) {
+        guard let cache = imageCache as? SKRequestResponseCacheable, let request = request else { return }
         let cachedResponse = CachedURLResponse(response: response, data: data)
         cache.storeCachedResponse(cachedResponse, forRequest: request)
     }
 }
 
+/// SKDefaultImageCache
 class SKDefaultImageCache: SKImageCacheable {
-    var cache: NSCache<AnyObject, AnyObject>
-
-    init() {
+    
+    /// NSCache<AnyObject, AnyObject>
+    internal var cache: NSCache<AnyObject, AnyObject>
+    
+    /// 构建
+    internal init() {
         cache = NSCache()
     }
-
-    func imageForKey(_ key: String) -> UIImage? {
+    
+    /// imageForKey
+    /// - Parameter key: String
+    /// - Returns: Optional<UIImage>
+    internal func imageForKey(_ key: String) -> Optional<UIImage> {
         return cache.object(forKey: key as AnyObject) as? UIImage
     }
-
-    func setImage(_ image: UIImage, forKey key: String) {
+    
+    /// setImage
+    /// - Parameters:
+    ///   - image: UIImage
+    ///   - key: String
+    internal func setImage(_ image: UIImage, forKey key: String) {
         cache.setObject(image, forKey: key as AnyObject)
     }
-
-    func removeImageForKey(_ key: String) {
+    
+    /// removeImageForKey
+    /// - Parameter key: String
+    internal func removeImageForKey(_ key: String) {
         cache.removeObject(forKey: key as AnyObject)
     }
     
-    func removeAllImages() {
+    /// removeAllImages
+    internal func removeAllImages() {
         cache.removeAllObjects()
     }
 }

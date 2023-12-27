@@ -9,24 +9,38 @@
 import UIKit
 
 open class SKCaptionView: UIView {
-    fileprivate var photo: SKPhotoProtocol?
+    
+    /// SKPhotoProtocol
+    fileprivate var photo: Optional<SKPhotoProtocol> = .none
+    /// UILabel
     fileprivate var photoLabel: UILabel!
+    /// CGFloat
     fileprivate var photoLabelPadding: CGFloat = 10
     
-    required public init?(coder aDecoder: NSCoder) {
+    
+    /// 构建
+    /// - Parameter aDecoder: NSCoder
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
+    /// 构建
+    /// - Parameter frame: CGRect
     public override init(frame: CGRect) {
         super.init(frame: frame)
     }
     
+    /// 构建
+    /// - Parameter photo: SKPhotoProtocol
     public convenience init(photo: SKPhotoProtocol) {
         self.init(frame: CGRect(x: 0, y: 0, width: SKMesurement.screenWidth, height: SKMesurement.screenHeight))
         self.photo = photo
         setup()
     }
     
+    /// photoLabel
+    /// - Parameter size: CGSize
+    /// - Returns: CGSize
     open override func sizeThatFits(_ size: CGSize) -> CGSize {
         guard let text = photoLabel.text, text.count > 0 else {
             return CGSize.zero
@@ -43,16 +57,18 @@ open class SKCaptionView: UIView {
     }
 }
 
-private extension SKCaptionView {
-    func setup() {
+extension SKCaptionView {
+    
+    /// setup
+    private func setup() {
         isOpaque = false
         autoresizingMask = [.flexibleWidth, .flexibleTopMargin, .flexibleRightMargin, .flexibleLeftMargin]
-        
         // setup photoLabel
         setupPhotoLabel()
     }
     
-    func setupPhotoLabel() {
+    /// setupPhotoLabel
+    private func setupPhotoLabel() {
         photoLabel = UILabel(frame: CGRect(x: photoLabelPadding, y: 0, width: bounds.size.width - (photoLabelPadding * 2), height: bounds.size.height))
         photoLabel.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         photoLabel.isOpaque = false

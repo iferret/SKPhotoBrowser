@@ -8,6 +8,10 @@
 import UIKit
 
 extension UIImage {
+    
+    /// bundledImage
+    /// - Parameter imageName: String
+    /// - Returns: UIImage
     static func bundledImage(named imageName: String) -> UIImage {
         let imagePath = "SKPhotoBrowser.bundle/images/\(imageName)"
 #if SWIFT_PACKAGE
