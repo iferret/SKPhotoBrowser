@@ -16,6 +16,8 @@ class SKToolbar: UIToolbar {
     
     /// UIBarButtonItem
     internal var toolActionButton: Optional<UIBarButtonItem> = .none
+    /// Optional<UIBarButtonItem>
+    internal var toolDownloadButton: Optional<UIBarButtonItem> = .none
     /// SKPhotoBrowser
     fileprivate weak var browser: Optional<SKPhotoBrowser> = .none
     
@@ -69,12 +71,19 @@ extension SKToolbar {
     
     /// setupToolbar
     private func setupToolbar() {
-        toolActionButton = UIBarButtonItem(barButtonSystemItem: .action, target: browser, action: #selector(SKPhotoBrowser.actionButtonPressed))
-        toolActionButton?.tintColor = UIColor.white
         var items = [UIBarButtonItem]()
         items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil))
-        if SKPhotoBrowserOptions.displayAction, let toolActionButton = toolActionButton {
-            items.append(toolActionButton)
+        if SKPhotoBrowserOptions.displayDownload == true {
+            let img: UIImage = .bundledImage(named: "btn_common_download_wh").redrawWith(.init(width: 20.0, height: 20.0)).withRenderingMode(.alwaysTemplate)
+            toolDownloadButton = .init(image: img, style: .plain, target: browser, action: #selector(SKPhotoBrowser.actionButtonPressed))
+            toolDownloadButton!.tintColor = UIColor.white
+            // items.append(toolActionButton!)
+        }
+        if SKPhotoBrowserOptions.displayAction == true {
+            let img: UIImage = .bundledImage(named: "btn_common_share_wh").redrawWith(.init(width: 20.0, height: 20.0)).withRenderingMode(.alwaysTemplate)
+            toolActionButton = .init(image: img, style: .plain, target: browser, action: #selector(SKPhotoBrowser.actionButtonPressed))
+            toolActionButton!.tintColor = UIColor.white
+            // items.append(toolActionButton!)
         }
         setItems(items, animated: false)
     }
@@ -82,6 +91,40 @@ extension SKToolbar {
     /// setupActionButton
     private func setupActionButton() {
         
+    }
+    
+    /// hideActionButton
+    /// - Parameter hidden: Bool
+    internal func hideActionButton(_ hidden: Bool) {
+        guard let item = toolActionButton else { return }
+        switch (items, hidden) {
+        case (.some(let items), true) where items.contains(item) == true:
+            var items = items
+            items.removeAll(where: { $0 == item })
+            self.setItems(items, animated: false)
+        case (.some(let items), false) where items.contains(item) == false:
+            var items = items
+            items.append(item)
+            self.setItems(items, animated: false)
+        default: break
+        }
+    }
+    
+    /// hideDownloadButton
+    /// - Parameter hidden: Bool
+    internal func hideDownloadButton(_ hidden: Bool) {
+        guard let item = toolDownloadButton else { return }
+        switch (items, hidden) {
+        case (.some(let items), true) where items.contains(item) == true:
+            var items = items
+            items.removeAll(where: { $0 == item })
+            self.setItems(items, animated: false)
+        case (.some(let items), false) where items.contains(item) == false:
+            var items = items
+            items.append(item)
+            self.setItems(items, animated: false)
+        default: break
+        }
     }
 }
 

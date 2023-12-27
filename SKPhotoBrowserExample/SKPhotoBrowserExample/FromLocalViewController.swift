@@ -74,39 +74,85 @@ extension FromLocalViewController {
 // MARK: - SKPhotoBrowserDelegate
 
 extension FromLocalViewController {
-    func didShowPhotoAtIndex(_ index: Int) {
+    
+    /// didShowPhotoAtIndex
+    /// - Parameters:
+    ///   - browser: SKPhotoBrowser
+    ///   - index: Int
+    internal func browser(_ browser: SKPhotoBrowser, didShowPhotoAtIndex index: Int) {
+        collectionView.visibleCells.forEach({$0.isHidden = false})
+        collectionView.cellForItem(at: IndexPath(item: index, section: 0))?.isHidden = true
+        
+        if index % 2 == 0 {
+            browser.hiddenActionButton(true)
+            browser.hideDownloadButton(false)
+        } else {
+            browser.hiddenActionButton(false)
+            browser.hideDownloadButton(true)
+        }
+    }
+    
+    /// willDismissAtPageIndex
+    /// - Parameters:
+    ///   - browser: SKPhotoBrowser
+    ///   - index: Int
+    internal func browser(_ browser: SKPhotoBrowser, willDismissAtPageIndex index: Int) {
         collectionView.visibleCells.forEach({$0.isHidden = false})
         collectionView.cellForItem(at: IndexPath(item: index, section: 0))?.isHidden = true
     }
     
-    func willDismissAtPageIndex(_ index: Int) {
-        collectionView.visibleCells.forEach({$0.isHidden = false})
-        collectionView.cellForItem(at: IndexPath(item: index, section: 0))?.isHidden = true
-    }
-    
-    func willShowActionSheet(_ photoIndex: Int) {
+    /// willShowActionSheetAtIndex
+    /// - Parameters:
+    ///   - browser: SKPhotoBrowser
+    ///   - photoIndex: Int
+    internal func browser(_ browser: SKPhotoBrowser, willShowActionSheetAtIndex photoIndex: Int) {
         // do some handle if you need
     }
     
-    func didDismissAtPageIndex(_ index: Int) {
+    /// didDismissAtPageIndex
+    /// - Parameters:
+    ///   - browser: SKPhotoBrowser
+    ///   - index: Int
+    internal func browser(_ browser: SKPhotoBrowser, didDismissAtPageIndex index: Int) {
         collectionView.cellForItem(at: IndexPath(item: index, section: 0))?.isHidden = false
     }
     
-    func didDismissActionSheetWithButtonIndex(_ buttonIndex: Int, photoIndex: Int) {
+    /// didDismissActionSheetWithButtonIndex
+    /// - Parameters:
+    ///   - browser: SKPhotoBrowser
+    ///   - buttonIndex: Int
+    ///   - photoIndex: Int
+    internal func browser(_ browser: SKPhotoBrowser, didDismissActionSheetWithButtonIndex buttonIndex: Int, photoIndex: Int) {
         // handle dismissing custom actions
     }
     
-    func removePhoto(_ browser: SKPhotoBrowser, index: Int, reload: @escaping (() -> Void)) {
+    /// removePhotoAtIndex
+    /// - Parameters:
+    ///   - browser: SKPhotoBrowser
+    ///   - index: Int
+    ///   - reload: @escaping (() -> Void)
+    internal func browser(_ browser: SKPhotoBrowser, removePhotoAtIndex index: Int, reload: @escaping (() -> Void)) {
         reload()
     }
-
-    func viewForPhoto(_ browser: SKPhotoBrowser, index: Int) -> UIView? {
+    
+    /// viewForPhotoAtIndex
+    /// - Parameters:
+    ///   - browser: SKPhotoBrowser
+    ///   - index: Int
+    /// - Returns: Optional<UIView>
+    internal func browser(_ browser: SKPhotoBrowser, viewForPhotoAtIndex index: Int) -> Optional<UIView> {
         return collectionView.cellForItem(at: IndexPath(item: index, section: 0))
     }
     
-    func captionViewForPhotoAtIndex(index: Int) -> SKCaptionView? {
+    /// captionViewForPhotoAtIndex
+    /// - Parameters:
+    ///   - browser: SKPhotoBrowser
+    ///   - index: Int
+    /// - Returns: Optional<SKCaptionView>
+    internal func browser(_ browser: SKPhotoBrowser, captionViewForPhotoAtIndex index: Int) -> Optional<SKCaptionView> {
         return nil
     }
+   
 }
 
 // MARK: - private

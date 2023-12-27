@@ -39,16 +39,20 @@ class FromWebViewController: UIViewController, SKPhotoBrowserDelegate {
 // MARK: - SKPhotoBrowserDelegate
 
 extension FromWebViewController {
-    func didDismissAtPageIndex(_ index: Int) {
+    
+    func browser(_ browser: SKPhotoBrowser, didDismissAtPageIndex index: Int) {
+        
     }
     
-    func didDismissActionSheetWithButtonIndex(_ buttonIndex: Int, photoIndex: Int) {
+    func browser(_ browser: SKPhotoBrowser, didDismissActionSheetWithButtonIndex buttonIndex: Int, photoIndex: Int) {
+        
     }
     
-    func removePhoto(index: Int, reload: (() -> Void)) {
+    func browser(_ browser: SKPhotoBrowser, removePhotoAtIndex index: Int, reload: @escaping (() -> Void)) {
         SKCache.sharedCache.removeImageForKey("somekey")
         reload()
     }
+    
 }
 
 // MARK: - private

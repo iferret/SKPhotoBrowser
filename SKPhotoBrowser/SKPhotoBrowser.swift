@@ -28,6 +28,8 @@ open class SKPhotoBrowser: UIViewController {
     
     /// UIBarButtonItem
     public var toolActionButton: Optional<UIBarButtonItem> { toolbar.toolActionButton }
+    /// Optional<UIBarButtonItem>
+    public var toolDownloadButton: Optional<UIBarButtonItem> { toolbar.toolDownloadButton }
     
     /// SKPagingScrollView
     internal lazy var pagingScrollView: SKPagingScrollView = SKPagingScrollView(frame: self.view.frame, browser: self)
@@ -164,7 +166,7 @@ open class SKPhotoBrowser: UIViewController {
         super.viewWillLayoutSubviews()
         isPerformingLayout = true
         // where did start
-        delegate?.didShowPhotoAtIndex?(self, index: currentPageIndex)
+        delegate?.browser?(self, didShowPhotoAtIndex: currentPageIndex)
         // toolbar
         toolbar.frame = frameForToolbarAtOrientation()
         // action
@@ -234,7 +236,7 @@ open class SKPhotoBrowser: UIViewController {
         pagingScrollView.updateContentOffset(currentPageIndex)
         pagingScrollView.tilePages()
         // didShowPhotoAtIndex
-        delegate?.didShowPhotoAtIndex?(self, index: currentPageIndex)
+        delegate?.browser?(self, didShowPhotoAtIndex: currentPageIndex)
         // isPerformingLayout
         isPerformingLayout = false
     }
@@ -259,13 +261,13 @@ open class SKPhotoBrowser: UIViewController {
         }
         dismiss(animated: !animated) {
             completion?()
-            self.delegate?.didDismissAtPageIndex?(self.currentPageIndex)
+            self.delegate?.browser?(self, didDismissAtPageIndex: self.currentPageIndex)
         }
     }
     
     /// determineAndClose
     open func determineAndClose() {
-        delegate?.willDismissAtPageIndex?(self.currentPageIndex)
+        delegate?.browser?(self, willDismissAtPageIndex: currentPageIndex)
         animator.willDismiss(self)
     }
     
@@ -304,13 +306,13 @@ open class SKPhotoBrowser: UIViewController {
 
 // MARK: - Public Function For Customizing Buttons
 
-public extension SKPhotoBrowser {
+extension SKPhotoBrowser {
     
     /// updateCloseButton
     /// - Parameters:
     ///   - image: UIImage
     ///   - size: CGSize
-    internal func updateCloseButton(_ image: UIImage, size: Optional<CGSize> = .none) {
+    public func updateCloseButton(_ image: UIImage, size: Optional<CGSize> = .none) {
         actionView.updateCloseButton(image: image, size: size)
     }
     
@@ -318,8 +320,20 @@ public extension SKPhotoBrowser {
     /// - Parameters:
     ///   - image: UIImage
     ///   - size:  Optional<CGSize>
-    internal func updateDeleteButton(_ image: UIImage, size: Optional<CGSize> = .none) {
+    public func updateDeleteButton(_ image: UIImage, size: Optional<CGSize> = .none) {
         actionView.updateDeleteButton(image: image, size: size)
+    }
+    
+    /// hiddenActionButton
+    /// - Parameter hidden: Bool
+    public func hiddenActionButton(_ hidden: Bool) {
+        toolbar?.hideActionButton(hidden)
+    }
+    
+    /// hideDownloadButton
+    /// - Parameter hidden: Bool
+    public func hideDownloadButton(_ hidden: Bool) {
+        toolbar.hideDownloadButton(hidden)
     }
 }
 
@@ -403,14 +417,14 @@ extension SKPhotoBrowser {
     /// - Parameter timer: Timer
     @objc public func hideControls(_ timer: Timer) {
         hideControls()
-        delegate?.controlsVisibilityToggled?(self, hidden: true)
+        delegate?.browser?(self, controlsVisibilityToggled: true)
     }
     
     /// toggleControls
     public func toggleControls() {
         let hidden = !areControlsHidden()
         setControlsHidden(hidden, animated: true, permanent: false)
-        delegate?.controlsVisibilityToggled?(self, hidden: areControlsHidden())
+        delegate?.browser?(self, controlsVisibilityToggled: areControlsHidden())
     }
     
     /// areControlsHidden
@@ -578,14 +592,14 @@ extension SKPhotoBrowser {
     /// actionButtonPressed
     /// - Parameter ignoreAndShare: Bool
     @objc internal func actionButtonPressed(ignoreAndShare: Bool) {
-        delegate?.willShowActionSheet?(currentPageIndex)
+        delegate?.browser?(self, willShowActionSheetAtIndex: currentPageIndex)
         guard photos.count > 0 else { return }
         if let titles = SKPhotoBrowserOptions.actionButtonTitles {
             let actionSheetController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
             actionSheetController.addAction(UIAlertAction(title: cancelTitle, style: .cancel))
             for idx in titles.indices {
-                actionSheetController.addAction(UIAlertAction(title: titles[idx], style: .default, handler: { (_) -> Void in
-                    self.delegate?.didDismissActionSheetWithButtonIndex?(idx, photoIndex: self.currentPageIndex)
+                actionSheetController.addAction(UIAlertAction(title: titles[idx], style: .default, handler: {[unowned self] (_) -> Void in
+                    self.delegate?.browser?(self, didDismissActionSheetWithButtonIndex: idx, photoIndex: self.currentPageIndex)
                 }))
             }
             if SKMesurement.isPhone {
@@ -709,7 +723,7 @@ extension SKPhotoBrowser: UIScrollViewDelegate {
         currentPageIndex = min(max(Int(floor(visibleBounds.midX / visibleBounds.width)), 0), photos.count - 1)
         
         if currentPageIndex != previousCurrentPage {
-            delegate?.didShowPhotoAtIndex?(self, index: currentPageIndex)
+            delegate?.browser?(self, didShowPhotoAtIndex: currentPageIndex)
             paginationView.update(currentPageIndex)
         }
     }
@@ -718,8 +732,8 @@ extension SKPhotoBrowser: UIScrollViewDelegate {
     /// - Parameter scrollView: UIScrollView
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         hideControlsAfterDelay()
-        let currentIndex = pagingScrollView.contentOffset.x / pagingScrollView.frame.size.width
-        delegate?.didScrollToIndex?(self, index: Int(currentIndex))
+        // didScrollToIndex
+        delegate?.browser?(self, didScrollToIndex: Int(pagingScrollView.contentOffset.x / pagingScrollView.frame.size.width))
     }
     
     /// scrollViewDidEndScrollingAnimation
