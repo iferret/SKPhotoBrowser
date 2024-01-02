@@ -376,7 +376,7 @@ extension SKPhotoBrowser {
         // reset
         cancelControlHiding()
         // start
-        controlVisibilityTimer = Timer.scheduledTimer(timeInterval: autoHideControllsfadeOutDelay, 
+        controlVisibilityTimer = Timer.scheduledTimer(timeInterval: autoHideControllsfadeOutDelay,
                                                       target: self,
                                                       selector: #selector(SKPhotoBrowser.hideControls(_:)),
                                                       userInfo: nil,
