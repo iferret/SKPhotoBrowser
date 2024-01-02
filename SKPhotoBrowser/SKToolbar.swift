@@ -82,6 +82,8 @@ class SKToolbar: UIView {
         _loadingView.hidesWhenStopped = true
         _loadingView.frame.size.width = 34.0
         _loadingView.frame.size.height = 34.0
+        _loadingView.backgroundColor = .black.withAlphaComponent(0.5)
+        _loadingView.layer.cornerRadius = 17.0
         let _item: UIBarButtonItem = .init(customView: _loadingView)
         _item.tag = 3001
         return _item
