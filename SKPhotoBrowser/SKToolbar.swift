@@ -54,7 +54,7 @@ class SKToolbar: UIView {
     
     /// 分享按钮
     private lazy var shareItem: UIBarButtonItem = {
-        let _img: UIImage = .bundledImage(named: "btn_common_share_wh").redrawWith(.init(width: 19.0, height: 19.0)).withRenderingMode(.alwaysTemplate)
+        let _img: UIImage = .bundledImage(named: "btn_common_share_wh").redrawWith(.init(width: 34.0, height: 34.0)).withRenderingMode(.alwaysTemplate)
         let _item: UIBarButtonItem = .init(image: _img, style: .plain, target: browser, action: #selector(itemActionHandler(_:)))
         _item.tintColor = UIColor.white
         return _item
@@ -62,7 +62,7 @@ class SKToolbar: UIView {
     
     /// 下载按钮
     private lazy var downloadItem: UIBarButtonItem = {
-        let _img: UIImage = .bundledImage(named: "btn_common_download_wh").redrawWith(.init(width: 19.0, height: 19.0)).withRenderingMode(.alwaysTemplate)
+        let _img: UIImage = .bundledImage(named: "btn_common_download_wh").redrawWith(.init(width: 34.0, height: 34.0)).withRenderingMode(.alwaysTemplate)
         let _item: UIBarButtonItem = .init(image: _img, style: .plain, target: browser, action: #selector(itemActionHandler(_:)))
         _item.tintColor = UIColor.white
         return _item
