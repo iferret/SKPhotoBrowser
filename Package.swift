@@ -7,26 +7,13 @@ import PackageDescription
 
 let package = Package(
     name: "SKPhotoBrowser",
-    platforms: [
-        .iOS(.v9)
-    ],
-    products: [
-        .library(name: "SKPhotoBrowser", targets: ["SKPhotoBrowser"])
-    ],
+    platforms: [ .iOS(.v12) ],
+    products: [ .library(name: "SKPhotoBrowser", targets: ["SKPhotoBrowser"]) ],
     targets: [
-        .target(name: "SKPhotoBrowser",
-                dependencies: ["SKPhotoBrowserObjC"],
-                path: "SKPhotoBrowser",
-                exclude: ["Info.plist", "Extends/ObjC"],
-                resources: [
-                    .copy("SKPhotoBrowser.bundle")
-                ]),
-        .target(name: "SKPhotoBrowserObjC",
-                path: "SKPhotoBrowser/Extends/ObjC",
-                publicHeadersPath: "."),
-        .testTarget(name: "SKPhotoBrowserTests",
-                    dependencies: ["SKPhotoBrowser"],
-                    path: "SKPhotoBrowserTests",
-                    exclude: ["Info.plist"])
+        .target(name: "SKPhotoBrowser", dependencies: ["SKPhotoBrowserObjC"], path: "SKPhotoBrowser", exclude: ["Info.plist", "Extends/ObjC"], resources: [
+            .copy("SKPhotoBrowser.bundle")
+        ]),
+        .target(name: "SKPhotoBrowserObjC", path: "SKPhotoBrowser/Extends/ObjC", publicHeadersPath: "."),
+        .testTarget(name: "SKPhotoBrowserTests", dependencies: ["SKPhotoBrowser"], path: "SKPhotoBrowserTests", exclude: ["Info.plist"])
     ]
 )
