@@ -212,11 +212,13 @@ open class SKZoomingScrollView: UIScrollView {
     
     /// displayImage
     /// - Parameter flag: Bool
-    open func displayImage(complete flag: Bool) {
+    open func displayImage(complete flag: Bool, reset: Bool = true) {
         // reset scale
-        maximumZoomScale = 1
-        minimumZoomScale = 1
-        zoomScale = 1
+        if reset == true {
+            maximumZoomScale = 1
+            minimumZoomScale = 1
+            zoomScale = 1
+        }
         
         if flag == false {
             if photo?.underlyingImage == nil {
