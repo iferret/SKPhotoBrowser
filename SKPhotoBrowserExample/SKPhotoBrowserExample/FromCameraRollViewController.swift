@@ -89,13 +89,9 @@ class FromCameraRollViewController: UIViewController, SKPhotoBrowserDelegate, UI
         guard let cell = collectionView.cellForItem(at: indexPath) as? ExampleCollectionViewCell else {
             return
         }
-        guard let originImage = cell.exampleImageView.image else {
-            return
-        }
-        
         func open(_ images: [UIImage]) {
             let photoImages: [SKPhotoProtocol] = images.map({ return SKPhoto.photoWithImage($0) })
-            let browser = SKPhotoBrowser.init(photos: photoImages, initialPageIndex: indexPath.row)
+            let browser = SKPhotoBrowser.init(photos: photoImages, initialIndex: indexPath.row)
             browser.initializePageIndex(indexPath.row)
             browser.delegate = self
 //            browser.displayDeleteButton = true

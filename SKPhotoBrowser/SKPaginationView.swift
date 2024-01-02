@@ -49,7 +49,7 @@ class SKPaginationView: UIView {
         setupPrevButton()
         setupNextButton()
         
-        update(browser?.currentPageIndex ?? 0)
+        update(browser?.currentIndex ?? 0)
     }
     
     /// hitTest

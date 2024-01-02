@@ -48,7 +48,7 @@ class SKPagingScrollView: UIScrollView {
         showsHorizontalScrollIndicator = SKPhotoBrowserOptions.displayPagingHorizontalScrollIndicator
         showsVerticalScrollIndicator = true
 
-        updateFrame(bounds, currentPageIndex: browser.currentPageIndex)
+        updateFrame(bounds, currentPageIndex: browser.currentIndex)
     }
     
     /// reload
@@ -163,7 +163,7 @@ class SKPagingScrollView: UIScrollView {
             let photo = browser.photos[index]
             page.photo = photo
             if let thumbnail = browser.animator.senderOriginImage,
-                index == browser.initPageIndex,
+                index == browser.initialIndex,
                 photo.underlyingImage == nil {
                 page.displayImage(thumbnail)
             }

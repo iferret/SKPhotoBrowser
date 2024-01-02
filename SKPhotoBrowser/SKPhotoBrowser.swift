@@ -14,11 +14,9 @@ public let SKPHOTO_LOADING_DID_END_NOTIFICATION = "photoLoadingDidEndNotificatio
 /// SKPhotoBrowser
 open class SKPhotoBrowser: UIViewController {
     /// Int
-    open var currentPageIndex: Int = 0
+    open var currentIndex: Int = 0
     /// Int
-    open var initPageIndex: Int = 0
-    /// UIActivityItemProvider
-    open var activityItemProvider: Optional<UIActivityItemProvider> = .none
+    open var initialIndex: Int = 0
     /// [SKPhotoProtocol]
     open var photos: [SKPhotoProtocol] {
         didSet { photos.enumerated().forEach { $0.element.index = $0.offset } }
@@ -95,17 +93,16 @@ open class SKPhotoBrowser: UIViewController {
     /// 构建
     /// - Parameters:
     ///   - photos: [SKPhotoProtocol]
-    ///   - initialPageIndex: Int
-    public init(photos: [SKPhotoProtocol], initialPageIndex: Int = 0) {
+    ///   - initialIndex: Int
+    public init(photos: [SKPhotoProtocol], initialIndex: Int = 0) {
         // setup index
         photos.enumerated().forEach { $0.element.index = $0.offset }
         self.photos = photos
-        
         //self.photos.forEach { $0.checkCache() }
-        self.currentPageIndex = min(initialPageIndex, photos.count - 1)
-        self.initPageIndex = self.currentPageIndex
+        self.currentIndex = min(initialIndex, photos.count - 1)
+        self.initialIndex = self.currentIndex
         super.init(nibName: .none, bundle: .none)
-        animator.senderOriginImage = photos[currentPageIndex].underlyingImage
+        animator.senderOriginImage = photos[currentIndex].underlyingImage
         // animator.senderViewForAnimation = photos[currentPageIndex] as? UIView
         
         self.modalPresentationCapturesStatusBarAppearance = true
@@ -157,7 +154,7 @@ open class SKPhotoBrowser: UIViewController {
         super.viewWillLayoutSubviews()
         isPerformingLayout = true
         // where did start
-        delegate?.browser?(self, didShowPhotoAtIndex: currentPageIndex)
+        delegate?.browser?(self, didShowPhotoAtIndex: currentIndex)
         // toolbar
         toolbar.frame = frameForToolbarAtOrientation()
         // action
@@ -167,7 +164,7 @@ open class SKPhotoBrowser: UIViewController {
         case .basic:  paginationView.updateFrame(frame: view.frame)
         case .bottom: paginationView.frame = frameForPaginationAtOrientation()
         }
-        pagingScrollView.updateFrame(view.bounds, currentPageIndex: currentPageIndex)
+        pagingScrollView.updateFrame(view.bounds, currentPageIndex: currentIndex)
         
         isPerformingLayout = false
     }
@@ -205,7 +202,7 @@ open class SKPhotoBrowser: UIViewController {
     /// loadAdjacentPhotosIfNecessary
     /// - Parameter photo: SKPhotoProtocol
     open func loadAdjacentPhotosIfNecessary(_ photo: SKPhotoProtocol) {
-        pagingScrollView.loadAdjacentPhotosIfNecessary(photo, currentPageIndex: currentPageIndex)
+        pagingScrollView.loadAdjacentPhotosIfNecessary(photo, currentPageIndex: currentIndex)
     }
     
     // MARK: - initialize / setup
@@ -221,10 +218,10 @@ open class SKPhotoBrowser: UIViewController {
         isPerformingLayout = true
         // reset local cache
         pagingScrollView.reload()
-        pagingScrollView.updateContentOffset(currentPageIndex)
+        pagingScrollView.updateContentOffset(currentIndex)
         pagingScrollView.tilePages()
         // didShowPhotoAtIndex
-        delegate?.browser?(self, didShowPhotoAtIndex: currentPageIndex)
+        delegate?.browser?(self, didShowPhotoAtIndex: currentIndex)
         // isPerformingLayout
         isPerformingLayout = false
     }
@@ -249,13 +246,13 @@ open class SKPhotoBrowser: UIViewController {
         }
         dismiss(animated: !animated) {
             completion?()
-            self.delegate?.browser?(self, didDismissAtPageIndex: self.currentPageIndex)
+            self.delegate?.browser?(self, didDismissAtPageIndex: self.currentIndex)
         }
     }
     
     /// determineAndClose
     open func determineAndClose() {
-        delegate?.browser?(self, willDismissAtPageIndex: currentPageIndex)
+        delegate?.browser?(self, willDismissAtPageIndex: currentIndex)
         animator.willDismiss(self)
     }
     
@@ -291,16 +288,16 @@ extension SKPhotoBrowser {
     /// - Parameter index: Int
     public func initializePageIndex(_ index: Int) {
         let i = min(index, photos.count - 1)
-        currentPageIndex = i
+        currentIndex = i
         
         if isViewLoaded {
             jumpToPageAtIndex(index)
             if !isViewActive {
                 pagingScrollView.tilePages()
             }
-            paginationView.update(currentPageIndex)
+            paginationView.update(currentIndex)
         }
-        self.initPageIndex = currentPageIndex
+        self.initialIndex = currentIndex
     }
     
     /// jumpToPageAtIndex
@@ -324,12 +321,12 @@ extension SKPhotoBrowser {
     
     /// gotoPreviousPage
     @objc public func gotoPreviousPage() {
-        jumpToPageAtIndex(currentPageIndex - 1)
+        jumpToPageAtIndex(currentIndex - 1)
     }
     
     /// gotoNextPage
     @objc public func gotoNextPage() {
-        jumpToPageAtIndex(currentPageIndex + 1)
+        jumpToPageAtIndex(currentIndex + 1)
     }
     
     /// cancelControlHiding
@@ -382,7 +379,7 @@ extension SKPhotoBrowser {
     /// getCurrentPageIndex
     /// - Returns: Int
     public func getCurrentPageIndex() -> Int {
-        return currentPageIndex
+        return currentIndex
     }
     
     /// addPhotos
@@ -479,7 +476,7 @@ extension SKPhotoBrowser {
     /// panGestureRecognized
     /// - Parameter sender: UIPanGestureRecognizer
     @objc internal func panGestureRecognized(_ sender: UIPanGestureRecognizer) {
-        guard let zoomingScrollView: SKZoomingScrollView = pagingScrollView.pageDisplayedAtIndex(currentPageIndex) else {
+        guard let zoomingScrollView: SKZoomingScrollView = pagingScrollView.pageDisplayedAtIndex(currentIndex) else {
             return
         }
         
@@ -540,11 +537,11 @@ extension SKPhotoBrowser {
         defer { reloadData() }
         if photos.count > 1 {
             pagingScrollView.deleteImage()
-            photos.remove(at: currentPageIndex)
-            if currentPageIndex != 0 {
+            photos.remove(at: currentIndex)
+            if currentIndex != 0 {
                 gotoPreviousPage()
             }
-            paginationView.update(currentPageIndex)
+            paginationView.update(currentIndex)
         } else if photos.count == 1 {
             dismissPhotoBrowser(animated: true)
         }
@@ -616,13 +613,13 @@ extension SKPhotoBrowser: UIScrollViewDelegate {
         pagingScrollView.tilePages()
         
         // Calculate current page
-        let previousCurrentPage = currentPageIndex
+        let previousCurrentPage = currentIndex
         let visibleBounds = pagingScrollView.bounds
-        currentPageIndex = min(max(Int(floor(visibleBounds.midX / visibleBounds.width)), 0), photos.count - 1)
+        currentIndex = min(max(Int(floor(visibleBounds.midX / visibleBounds.width)), 0), photos.count - 1)
         
-        if currentPageIndex != previousCurrentPage {
-            delegate?.browser?(self, didShowPhotoAtIndex: currentPageIndex)
-            paginationView.update(currentPageIndex)
+        if currentIndex != previousCurrentPage {
+            delegate?.browser?(self, didShowPhotoAtIndex: currentIndex)
+            paginationView.update(currentIndex)
         }
     }
     

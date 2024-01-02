@@ -66,12 +66,12 @@ class SKAnimator: NSObject, SKPhotoBrowserAnimatorDelegate {
     /// willPresent
     /// - Parameter browser: SKPhotoBrowser
     internal func willPresent(_ browser: SKPhotoBrowser) {
-        guard let sender = browser.delegate?.browser?(browser, viewForPhotoAtIndex: browser.currentPageIndex) ?? senderViewForAnimation else {
+        guard let sender = browser.delegate?.browser?(browser, viewForPhotoAtIndex: browser.currentIndex) ?? senderViewForAnimation else {
             presentAnimation(browser)
             return
         }
         
-        let photo = browser.photoAtIndex(browser.currentPageIndex)
+        let photo = browser.photoAtIndex(browser.currentIndex)
         let imageFromView = (senderOriginImage ?? browser.getImageFromView(sender)).rotateImageByOrientation()
         let imageRatio = imageFromView.size.width / imageFromView.size.height
         
@@ -97,9 +97,9 @@ class SKAnimator: NSObject, SKPhotoBrowserAnimatorDelegate {
     /// willDismiss
     /// - Parameter browser: SKPhotoBrowser
     internal func willDismiss(_ browser: SKPhotoBrowser) {
-        guard let sender = browser.delegate?.browser?(browser, viewForPhotoAtIndex: browser.currentPageIndex),
-              let image = browser.photoAtIndex(browser.currentPageIndex).underlyingImage,
-              let scrollView = browser.pageDisplayedAtIndex(browser.currentPageIndex) else {
+        guard let sender = browser.delegate?.browser?(browser, viewForPhotoAtIndex: browser.currentIndex),
+              let image = browser.photoAtIndex(browser.currentIndex).underlyingImage,
+              let scrollView = browser.pageDisplayedAtIndex(browser.currentIndex) else {
             senderViewForAnimation?.isHidden = false
             browser.dismissPhotoBrowser(animated: false) {
                 self.resizableImageView?.removeFromSuperview()
@@ -116,7 +116,7 @@ class SKAnimator: NSObject, SKPhotoBrowserAnimatorDelegate {
         senderViewOriginalFrame = calcOriginFrame(sender)
         
         if let resizableImageView = resizableImageView {
-            let photo = browser.photoAtIndex(browser.currentPageIndex)
+            let photo = browser.photoAtIndex(browser.currentIndex)
             let contentOffset = scrollView.contentOffset
             let scrollFrame = scrollView.imageView?.frame ?? .zero
             let offsetY = scrollView.center.y - (scrollView.bounds.height/2)

@@ -56,7 +56,7 @@ extension FromLocalViewController {
 
 extension FromLocalViewController {
     @objc(collectionView:didSelectItemAtIndexPath:) func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let browser = SKPhotoBrowser(photos: images, initialPageIndex: indexPath.row)
+        let browser = SKPhotoBrowser(photos: images, initialIndex: indexPath.row)
         browser.delegate = self
 
         present(browser, animated: true, completion: {})
