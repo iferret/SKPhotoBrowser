@@ -12,7 +12,7 @@ import SKPhotoBrowserObjC
 #endif
 
 /// SKPhotoProtocol
-@objc public protocol SKPhotoProtocol: AnyObject {
+public protocol SKPhotoProtocol: AnyObject {
     var index: Int { get set }
     var underlyingImage: Optional<UIImage> { get }
     var caption: Optional<String> { get }
