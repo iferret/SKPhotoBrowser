@@ -55,17 +55,19 @@ class SKToolbar: UIView {
     /// 分享按钮
     private lazy var shareItem: UIBarButtonItem = {
         let _img: UIImage = .bundledImage(named: "btn_common_share_wh").redrawWith(.init(width: 34.0, height: 34.0)).withRenderingMode(.alwaysOriginal)
-        let _item: UIBarButtonItem = .init(image: _img, style: .plain, target: self, action: #selector(itemActionHandler(_:)))
-        _item.tintColor = UIColor.white
-        return _item
+        let _btn: UIButton = .init(type: .custom)
+        _btn.setBackgroundImage(_img, for: .normal)
+        _btn.addTarget(self, action: #selector(itemActionHandler(_:)), for: .touchUpInside)
+        return .init(customView: _btn)
     }()
     
     /// 下载按钮
     private lazy var downloadItem: UIBarButtonItem = {
         let _img: UIImage = .bundledImage(named: "btn_common_download_wh").redrawWith(.init(width: 34.0, height: 34.0)).withRenderingMode(.alwaysOriginal)
-        let _item: UIBarButtonItem = .init(image: _img, style: .plain, target: self, action: #selector(itemActionHandler(_:)))
-        _item.tintColor = UIColor.white
-        return _item
+        let _btn: UIButton = .init(type: .custom)
+        _btn.setBackgroundImage(_img, for: .normal)
+        _btn.addTarget(self, action: #selector(itemActionHandler(_:)), for: .touchUpInside)
+        return .init(customView: _btn)
     }()
     
     /// UIBarButtonItem
@@ -170,9 +172,9 @@ extension SKToolbar {
     /// - Parameter sender: UIBarButtonItem
     @objc private func itemActionHandler(_ sender: UIBarButtonItem) {
         switch sender {
-        case shareItem:
+        case shareItem.customView:
             delegate?.toolbar(self, shareActionHandler: sender)
-        case downloadItem:
+        case downloadItem.customView:
             delegate?.toolbar(self, downloadActionHandler: sender)
         default: break
         }
