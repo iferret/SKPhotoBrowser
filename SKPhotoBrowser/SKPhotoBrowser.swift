@@ -98,21 +98,6 @@ open class SKPhotoBrowser: UIViewController {
     
     /// 构建
     /// - Parameters:
-    ///   - nibNameOrNil: String
-    ///   - nibBundleOrNil: Bundle
-    public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        super.init(nibName: nil, bundle: nil)
-        setup()
-    }
-    
-    /// 构建
-    /// - Parameter photos: [SKPhotoProtocol]
-    public convenience init(photos: [SKPhotoProtocol]) {
-        self.init(photos: photos, initialPageIndex: 0)
-    }
-    
-    /// 构建
-    /// - Parameters:
     ///   - originImage: UIImage
     ///   - photos: [SKPhotoProtocol]
     ///   - animatedFromView: UIView
@@ -123,6 +108,15 @@ open class SKPhotoBrowser: UIViewController {
         self.photos.forEach { $0.checkCache() }
         animator.senderOriginImage = originImage
         animator.senderViewForAnimation = animatedFromView
+    }
+    
+    /// 构建
+    /// - Parameters:
+    ///   - nibNameOrNil: String
+    ///   - nibBundleOrNil: Bundle
+    public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nil, bundle: nil)
+        setup()
     }
     
     /// 构建
@@ -141,8 +135,14 @@ open class SKPhotoBrowser: UIViewController {
         animator.senderViewForAnimation = photos[currentPageIndex] as? UIView
     }
     
+    /// 构建
+    /// - Parameter photos: [SKPhotoProtocol]
+    public convenience init(photos: [SKPhotoProtocol]) {
+        self.init(photos: photos, initialPageIndex: 0)
+    }
+    
     /// setup
-    internal func setup() {
+    private func setup() {
         modalPresentationCapturesStatusBarAppearance = true
         modalPresentationStyle = .custom
         modalTransitionStyle = .crossDissolve
@@ -172,12 +172,8 @@ open class SKPhotoBrowser: UIViewController {
     /// - Parameter animated: Bool
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
+        /// reloadData
         reloadData()
-        var i = 0
-        for photo: SKPhotoProtocol in photos {
-            photo.index = i
-            i += 1
-        }
     }
     
     /// viewWillLayoutSubviews
