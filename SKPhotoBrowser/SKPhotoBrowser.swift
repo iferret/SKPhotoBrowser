@@ -20,7 +20,9 @@ open class SKPhotoBrowser: UIViewController {
     /// UIActivityItemProvider
     open var activityItemProvider: Optional<UIActivityItemProvider> = .none
     /// [SKPhotoProtocol]
-    open var photos: [SKPhotoProtocol] = []
+    open var photos: [SKPhotoProtocol] {
+        didSet { photos.enumerated().forEach { $0.element.index = $0.offset } }
+    }
     /// Double
     open var autoHideControllsfadeOutDelay: Double = 4.0
     /// Bool
@@ -89,65 +91,39 @@ open class SKPhotoBrowser: UIViewController {
     // strings
     open var cancelTitle = "Cancel"
     
-    /// 构建
-    /// - Parameter aDecoder: NSCoder
-    public required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        setup()
-    }
-    
-    /// 构建
-    /// - Parameters:
-    ///   - originImage: UIImage
-    ///   - photos: [SKPhotoProtocol]
-    ///   - animatedFromView: UIView
-    @available(*, deprecated)
-    public convenience init(originImage: UIImage, photos: [SKPhotoProtocol], animatedFromView: UIView) {
-        self.init(nibName: nil, bundle: nil)
-        self.photos = photos
-        self.photos.forEach { $0.checkCache() }
-        animator.senderOriginImage = originImage
-        animator.senderViewForAnimation = animatedFromView
-    }
-    
-    /// 构建
-    /// - Parameters:
-    ///   - nibNameOrNil: String
-    ///   - nibBundleOrNil: Bundle
-    public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        super.init(nibName: nil, bundle: nil)
-        setup()
-    }
     
     /// 构建
     /// - Parameters:
     ///   - photos: [SKPhotoProtocol]
     ///   - initialPageIndex: Int
-    public convenience init(photos: [SKPhotoProtocol], initialPageIndex: Int) {
+    public init(photos: [SKPhotoProtocol], initialPageIndex: Int = 0) {
         // setup index
         photos.enumerated().forEach { $0.element.index = $0.offset }
-        self.init(nibName: nil, bundle: nil)
         self.photos = photos
+        
         //self.photos.forEach { $0.checkCache() }
         self.currentPageIndex = min(initialPageIndex, photos.count - 1)
         self.initPageIndex = self.currentPageIndex
+        super.init(nibName: .none, bundle: .none)
         animator.senderOriginImage = photos[currentPageIndex].underlyingImage
-        animator.senderViewForAnimation = photos[currentPageIndex] as? UIView
+        // animator.senderViewForAnimation = photos[currentPageIndex] as? UIView
+        
+        self.modalPresentationCapturesStatusBarAppearance = true
+        self.modalPresentationStyle = .custom
+        self.modalTransitionStyle = .crossDissolve
+        
+        // add observer
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleSKPhotoLoadingDidEndNotification(_:)),
+                                               name: .init(SKPHOTO_LOADING_DID_END_NOTIFICATION), 
+                                               object: nil)
+        
     }
     
     /// 构建
-    /// - Parameter photos: [SKPhotoProtocol]
-    public convenience init(photos: [SKPhotoProtocol]) {
-        self.init(photos: photos, initialPageIndex: 0)
-    }
-    
-    /// setup
-    private func setup() {
-        modalPresentationCapturesStatusBarAppearance = true
-        modalPresentationStyle = .custom
-        modalTransitionStyle = .crossDissolve
-        let name: Notification.Name = .init(rawValue: SKPHOTO_LOADING_DID_END_NOTIFICATION)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleSKPhotoLoadingDidEndNotification(_:)), name: name, object: nil)
+    /// - Parameter coder: NSCoder
+    public required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - override
