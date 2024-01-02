@@ -21,26 +21,13 @@ import UIKit
     ///   - browser: SKPhotoBrowser
     ///   - index: Int
     @objc optional func browser(_ browser: SKPhotoBrowser, willDismissAtPageIndex index: Int)
-    
-    /// Tells the delegate that the browser will start showing the `UIActionSheet`
-    /// - Parameters:
-    ///   - browser: SKPhotoBrowser
-    ///   - photoIndex: Int
-    @objc optional func browser(_ browser: SKPhotoBrowser, willShowActionSheetAtIndex photoIndex: Int)
-    
+
     /// Tells the delegate that the browser has been dismissed
     /// - Parameters:
     ///   - browser: SKPhotoBrowser
     ///   - index: Int
     @objc optional func browser(_ browser: SKPhotoBrowser, didDismissAtPageIndex index: Int)
     
-    /// Tells the delegate that the browser did dismiss the UIActionSheet
-    /// - Parameters:
-    ///   - browser: SKPhotoBrowser
-    ///   - buttonIndex: the index of the pressed button
-    ///   - photoIndex:  the index of the current photo
-    @objc optional func browser(_ browser: SKPhotoBrowser, didDismissActionSheetWithButtonIndex buttonIndex: Int, photoIndex: Int)
-
     /// Tells the delegate that the browser did scroll to index
     /// - Parameters:
     ///   - browser: SKPhotoBrowser
@@ -73,5 +60,17 @@ import UIKit
     ///   - index: the index of the photo
     /// - Returns: Optional<SKCaptionView>
     @objc optional func browser(_ browser: SKPhotoBrowser, captionViewForPhotoAtIndex index: Int) -> Optional<SKCaptionView>
+    
+    /// shareActionHandler
+    /// - Parameters:
+    ///   - browser: SKPhotoBrowser
+    ///   - sender: UIBarButtonItem
+    @objc optional func browser(_ browser: SKPhotoBrowser, shareActionHandler sender: UIBarButtonItem)
+    
+    /// downloadActionHandler
+    /// - Parameters:
+    ///   - browser: SKPhotoBrowser
+    ///   - sender: UIBarButtonItem
+    @objc optional func browser(_ browser: SKPhotoBrowser, downloadActionHandler sender: UIBarButtonItem)
 }
 

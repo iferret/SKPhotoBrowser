@@ -26,10 +26,20 @@ open class SKPhotoBrowser: UIViewController {
     /// Bool
     open var shouldAutoHideControlls: Bool = true
     
-    /// UIBarButtonItem
-    public var toolActionButton: Optional<UIBarButtonItem> { toolbar.toolActionButton }
+    /// Optional<ActionKind>
+    open var actionKind: Optional<ActionKind> {
+        get { toolbar.actionKind }
+        set { toolbar.actionKind = newValue }
+    }
+    
     /// Optional<UIBarButtonItem>
-    public var toolDownloadButton: Optional<UIBarButtonItem> { toolbar.toolDownloadButton }
+    open var leftBarButtonItem: Optional<UIBarButtonItem> { toolbar.leftBarButtonItem }
+    /// Optional<UIBarButtonItem>
+    open var rightBarButtonItem: Optional<UIBarButtonItem> { toolbar.rightBarButtonItem }
+    /// Optional<[UIBarButtonItem]>
+    open var barButtonItems: Optional<[UIBarButtonItem]> { toolbar.barButtonItems }
+    /// Optional<UIActivityIndicatorView>
+    open var loadingView: Optional<UIActivityIndicatorView> { toolbar.loadingView }
     
     /// SKPagingScrollView
     internal lazy var pagingScrollView: SKPagingScrollView = SKPagingScrollView(frame: self.view.frame, browser: self)
@@ -40,12 +50,16 @@ open class SKPhotoBrowser: UIViewController {
     internal let animator: SKAnimator = .init()
     
     // SKActionView
-    fileprivate var actionView: SKActionView!
+    fileprivate(set) lazy var actionView: SKActionView = .init(frame: view.frame, browser: self)
     /// SKPaginationView
-    fileprivate(set) var paginationView: SKPaginationView!
+    fileprivate(set) lazy var paginationView: SKPaginationView = .init(frame: view.frame, browser: self)
     /// SKToolbar
-    internal var toolbar: SKToolbar!
-
+    fileprivate(set) lazy var toolbar: SKToolbar = {
+        let _toolbar: SKToolbar = .init(frame: self.frameForToolbarAtOrientation(), browser: self)
+        _toolbar.delegate = self
+        return _toolbar
+    }()
+    
     /// Optional<UIPanGestureRecognizer>
     fileprivate var panGesture: Optional<UIPanGestureRecognizer> = .none
     
@@ -142,9 +156,12 @@ open class SKPhotoBrowser: UIViewController {
         configureAppearance()
         configurePagingScrollView()
         configureGestureControl()
-        configureActionView()
-        configurePaginationView()
-        configureToolbar()
+        // add actionView
+        view.addSubview(actionView)
+        // add paginationView
+        view.addSubview(paginationView)
+        // add toolbar
+        view.addSubview(toolbar)
         
         animator.willPresent(self)
     }
@@ -271,37 +288,6 @@ open class SKPhotoBrowser: UIViewController {
         animator.willDismiss(self)
     }
     
-    /// popupShare
-    /// - Parameter includeCaption: Bool
-    open func popupShare(includeCaption: Bool = true) {
-        let photo = photos[currentPageIndex]
-        guard let underlyingImage = photo.underlyingImage else { return }
-        var activityItems: [AnyObject] = [underlyingImage]
-        if photo.caption != nil && includeCaption {
-            if let shareExtraCaption = SKPhotoBrowserOptions.shareExtraCaption {
-                let caption = photo.caption ?? "" + shareExtraCaption
-                activityItems.append(caption as AnyObject)
-            } else {
-                activityItems.append(photo.caption as AnyObject)
-            }
-        }
-        
-        if let activityItemProvider = activityItemProvider {
-            activityItems.append(activityItemProvider.item as AnyObject)
-        }
-        
-        let controller: UIActivityViewController = .init(activityItems: activityItems, applicationActivities: nil)
-        controller.completionWithItemsHandler = { (activity, success, items, error) in
-            self.hideControlsAfterDelay()
-        }
-        if SKMesurement.isPhone {
-            present(controller, animated: true, completion: nil)
-        } else {
-            controller.modalPresentationStyle = .popover
-            controller.popoverPresentationController?.barButtonItem = toolbar.toolActionButton
-            present(controller, animated: true, completion: nil)
-        }
-    }
 }
 
 // MARK: - Public Function For Customizing Buttons
@@ -324,17 +310,6 @@ extension SKPhotoBrowser {
         actionView.updateDeleteButton(image: image, size: size)
     }
     
-    /// hiddenActionButton
-    /// - Parameter hidden: Bool
-    public func hiddenActionButton(_ hidden: Bool) {
-        toolbar?.hideActionButton(hidden)
-    }
-    
-    /// hideDownloadButton
-    /// - Parameter hidden: Bool
-    public func hideDownloadButton(_ hidden: Bool) {
-        toolbar.hideDownloadButton(hidden)
-    }
 }
 
 // MARK: - Public Function For Browser Control
@@ -491,20 +466,20 @@ extension SKPhotoBrowser {
     /// frameForToolbarAtOrientation
     /// - Returns: CGRect
     internal func frameForToolbarAtOrientation() -> CGRect {
-        let offset: CGFloat = {
-            if #available(iOS 11.0, *) {
-                return view.safeAreaInsets.bottom - 5.0
-            } else {
-                return 15.0
-            }
-        }()
-        return view.bounds.divided(atDistance: 44, from: .maxYEdge).slice.offsetBy(dx: 0, dy: -offset)
+        let offset: CGFloat
+        if #available(iOS 11.0, *) {
+            offset = view.safeAreaInsets.bottom - 5.0
+        } else {
+            offset = 15.0
+        }
+        return view.bounds.divided(atDistance: 44.0, from: .maxYEdge).slice.offsetBy(dx: 0.0, dy: -offset)
     }
     
     /// frameForToolbarHideAtOrientation
     /// - Returns: CGRect
     internal func frameForToolbarHideAtOrientation() -> CGRect {
-        return view.bounds.divided(atDistance: 44, from: .maxYEdge).slice.offsetBy(dx: 0, dy: 44)
+        let height: CGFloat = 44.0
+        return view.bounds.divided(atDistance: height, from: .maxYEdge).slice.offsetBy(dx: 0.0, dy: height)
     }
     
     /// frameForPaginationAtOrientation
@@ -589,36 +564,6 @@ extension SKPhotoBrowser {
         }
     }
     
-    /// actionButtonPressed
-    /// - Parameter ignoreAndShare: Bool
-    @objc internal func actionButtonPressed(ignoreAndShare: Bool) {
-        delegate?.browser?(self, willShowActionSheetAtIndex: currentPageIndex)
-        guard photos.count > 0 else { return }
-        if let titles = SKPhotoBrowserOptions.actionButtonTitles {
-            let actionSheetController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-            actionSheetController.addAction(UIAlertAction(title: cancelTitle, style: .cancel))
-            for idx in titles.indices {
-                actionSheetController.addAction(UIAlertAction(title: titles[idx], style: .default, handler: {[unowned self] (_) -> Void in
-                    self.delegate?.browser?(self, didDismissActionSheetWithButtonIndex: idx, photoIndex: self.currentPageIndex)
-                }))
-            }
-            if SKMesurement.isPhone {
-                present(actionSheetController, animated: true, completion: nil)
-            } else {
-                actionSheetController.modalPresentationStyle = .popover
-                if let popoverController = actionSheetController.popoverPresentationController {
-                    popoverController.sourceView = self.view
-                    popoverController.barButtonItem = toolbar.toolActionButton
-                }
-                present(actionSheetController, animated: true, completion: { () -> Void in
-                    
-                })
-            }
-        } else {
-            popupShare()
-        }
-    }
-    
     /// deleteImage
     internal func deleteImage() {
         defer { reloadData() }
@@ -663,24 +608,6 @@ extension SKPhotoBrowser {
         if let panGesture = panGesture {
             view.addGestureRecognizer(panGesture)
         }
-    }
-    
-    /// configureActionView
-    private func configureActionView() {
-        actionView = SKActionView(frame: view.frame, browser: self)
-        view.addSubview(actionView)
-    }
-    
-    /// configurePaginationView
-    private func configurePaginationView() {
-        paginationView = SKPaginationView(frame: view.frame, browser: self)
-        view.addSubview(paginationView)
-    }
-    
-    /// configureToolbar
-    private func configureToolbar() {
-        toolbar = SKToolbar(frame: frameForToolbarAtOrientation(), browser: self)
-        view.addSubview(toolbar)
     }
     
     /// setControlsHidden
@@ -741,4 +668,26 @@ extension SKPhotoBrowser: UIScrollViewDelegate {
     public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         isEndAnimationByToolBar = true
     }
+}
+
+// MARK: - SKToolbarDelegate
+extension SKPhotoBrowser: SKToolbarDelegate {
+    
+    /// shareActionHandler
+    /// - Parameters:
+    ///   - toolbar: SKToolbar
+    ///   - sender: UIBarButtonItem
+    internal func toolbar(_ toolbar: SKToolbar, shareActionHandler sender: UIBarButtonItem) {
+        delegate?.browser?(self, shareActionHandler: sender)
+    }
+    
+    /// downloadActionHandler
+    /// - Parameters:
+    ///   - toolbar: SKToolbar
+    ///   - sender: UIBarButtonItem
+    internal func toolbar(_ toolbar: SKToolbar, downloadActionHandler sender: UIBarButtonItem) {
+        delegate?.browser?(self, downloadActionHandler: sender)
+    }
+    
+    
 }

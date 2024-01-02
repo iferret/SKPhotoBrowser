@@ -84,11 +84,9 @@ extension FromLocalViewController {
         collectionView.cellForItem(at: IndexPath(item: index, section: 0))?.isHidden = true
         
         if index % 2 == 0 {
-            browser.hiddenActionButton(true)
-            browser.hideDownloadButton(false)
+            browser.actionKind = .loading
         } else {
-            browser.hiddenActionButton(false)
-            browser.hideDownloadButton(true)
+            browser.actionKind = .share
         }
     }
     

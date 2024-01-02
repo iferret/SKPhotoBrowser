@@ -11,37 +11,108 @@ import UIKit
 // helpers which often used
 private let bundle = Bundle(for: SKPhotoBrowser.self)
 
+/// SKToolbarDelegate
+protocol SKToolbarDelegate: AnyObject {
+    
+    /// shareActionHandler
+    /// - Parameters:
+    ///   - toolbar: SKToolbar
+    ///   - sender: UIBarButtonItem
+    func toolbar(_ toolbar: SKToolbar, shareActionHandler sender: UIBarButtonItem)
+    
+    /// downloadActionHandler
+    /// - Parameters:
+    ///   - toolbar: SKToolbar
+    ///   - sender: UIBarButtonItem
+    func toolbar(_ toolbar: SKToolbar, downloadActionHandler sender: UIBarButtonItem)
+    
+}
+
 /// SKToolbar
-class SKToolbar: UIToolbar {
+class SKToolbar: UIView {
+    /// SKPhotoBrowser.ActionKind
+    typealias ActionKind = SKPhotoBrowser.ActionKind
+    
+    // MARK: 公开属性
+    
+    /// Optional<ActionKind>
+    internal var actionKind: Optional<ActionKind> = .none {
+        didSet { setupToolbar(with: actionKind) }
+    }
+    /// Optional<UIBarButtonItem>
+    internal var leftBarButtonItem: Optional<UIBarButtonItem> { toolbar.items?.first }
+    /// Optional<UIBarButtonItem>
+    internal var rightBarButtonItem: Optional<UIBarButtonItem> { toolbar.items?.last }
+    /// Optional<UIActivityIndicatorView>
+    internal var loadingView: Optional<UIActivityIndicatorView> { toolbar.items?.first(where: { $0.customView is UIActivityIndicatorView })?.customView() }
+    /// Optional<[UIBarButtonItem]>
+    internal var barButtonItems: Optional<[UIBarButtonItem]> { toolbar.items }
+    /// Optional<SKToolbarDelegate>
+    internal weak var delegate: Optional<SKToolbarDelegate> = .none
+    
+    // MARK: 私有属性
+    
+    /// 分享按钮
+    private lazy var shareItem: UIBarButtonItem = {
+        let _img: UIImage = .bundledImage(named: "btn_common_share_wh").redrawWith(.init(width: 19.0, height: 19.0)).withRenderingMode(.alwaysTemplate)
+        let _item: UIBarButtonItem = .init(image: _img, style: .plain, target: browser, action: #selector(itemActionHandler(_:)))
+        _item.tintColor = UIColor.white
+        return _item
+    }()
+    
+    /// 下载按钮
+    private lazy var downloadItem: UIBarButtonItem = {
+        let _img: UIImage = .bundledImage(named: "btn_common_download_wh").redrawWith(.init(width: 19.0, height: 19.0)).withRenderingMode(.alwaysTemplate)
+        let _item: UIBarButtonItem = .init(image: _img, style: .plain, target: browser, action: #selector(itemActionHandler(_:)))
+        _item.tintColor = UIColor.white
+        return _item
+    }()
     
     /// UIBarButtonItem
-    internal var toolActionButton: Optional<UIBarButtonItem> = .none
-    /// Optional<UIBarButtonItem>
-    internal var toolDownloadButton: Optional<UIBarButtonItem> = .none
+    private lazy var loadingItem: UIBarButtonItem = {
+        let _loadingView: UIActivityIndicatorView
+        if #available(iOS 13.0, *) {
+            _loadingView = .init(style: .medium)
+        } else {
+            _loadingView = .init(style: .white)
+        }
+        _loadingView.color = .white
+        _loadingView.hidesWhenStopped = true
+        let _item: UIBarButtonItem = .init(customView: _loadingView)
+        _item.tag = 3001
+        return _item
+    }()
+    
+    /// UIToolbar
+    private lazy var toolbar: UIToolbar = {
+        let _toolbar: UIToolbar = .init(frame: .zero)
+        _toolbar.backgroundColor = .clear
+        _toolbar.clipsToBounds = true
+        _toolbar.isTranslucent = true
+        _toolbar.setBackgroundImage(UIImage(), forToolbarPosition: .any, barMetrics: .default)
+        return _toolbar
+    }()
+    
     /// SKPhotoBrowser
-    fileprivate weak var browser: Optional<SKPhotoBrowser> = .none
+    private weak var browser: Optional<SKPhotoBrowser>
     
-    /// 构建
-    /// - Parameter aDecoder: NSCoder
-    internal required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
-    
-    /// 构建
-    /// - Parameter frame: CGRect
-    internal override init(frame: CGRect) {
-        super.init(frame: frame)
-    }
+    // MARK: 生命周期
     
     /// 构建
     /// - Parameters:
     ///   - frame: CGRect
     ///   - browser: SKPhotoBrowser
-    internal convenience init(frame: CGRect, browser: SKPhotoBrowser) {
-        self.init(frame: frame)
+    internal init(frame: CGRect, browser: SKPhotoBrowser) {
         self.browser = browser
-        setupApperance()
-        setupToolbar()
+        super.init(frame: frame)
+        // 初始化
+        initialize()
+    }
+    
+    /// 构建
+    /// - Parameter coder: NSCoder
+    internal required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     /// hitTest
@@ -57,74 +128,54 @@ class SKToolbar: UIToolbar {
         }
         return nil
     }
+    
+    /// layoutSubviews
+    internal override func layoutSubviews() {
+        super.layoutSubviews()
+        // update toolbar frame
+        toolbar.frame = bounds
+    }
 }
 
 extension SKToolbar {
     
-    /// setupApperance
-    private func setupApperance() {
-        backgroundColor = .clear
-        clipsToBounds = true
-        isTranslucent = true
-        setBackgroundImage(UIImage(), forToolbarPosition: .any, barMetrics: .default)
+    /// 初始化
+    private func initialize() {
+        // add toolbar
+        addSubview(toolbar)
+        // setupToolbar
+        setupToolbar(with: actionKind)
     }
     
     /// setupToolbar
-    private func setupToolbar() {
-        var items = [UIBarButtonItem]()
-        items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil))
-        if SKPhotoBrowserOptions.displayDownload == true {
-            let img: UIImage = .bundledImage(named: "btn_common_download_wh").redrawWith(.init(width: 20.0, height: 20.0)).withRenderingMode(.alwaysTemplate)
-            toolDownloadButton = .init(image: img, style: .plain, target: browser, action: #selector(SKPhotoBrowser.actionButtonPressed))
-            toolDownloadButton!.tintColor = UIColor.white
-            // items.append(toolActionButton!)
+    /// - Parameter actionKind: Optional<ActionKind>
+    private func setupToolbar(with actionKind: Optional<ActionKind>) {
+        switch actionKind {
+        case .some(.share) where SKPhotoBrowserOptions.displayAction == true:
+            toolbar.items = [.flexible(), shareItem]
+        case .some(.download) where SKPhotoBrowserOptions.displayDownload == true:
+            toolbar.items = [.flexible(), downloadItem]
+        case .some(.loading):
+            toolbar.items = [.flexible(), loadingItem]
+            if let customView: UIActivityIndicatorView = loadingItem.customView() {
+                customView.startAnimating()
+            }
+        default:
+            toolbar.items = []
         }
-        if SKPhotoBrowserOptions.displayAction == true {
-            let img: UIImage = .bundledImage(named: "btn_common_share_wh").redrawWith(.init(width: 20.0, height: 20.0)).withRenderingMode(.alwaysTemplate)
-            toolActionButton = .init(image: img, style: .plain, target: browser, action: #selector(SKPhotoBrowser.actionButtonPressed))
-            toolActionButton!.tintColor = UIColor.white
-            // items.append(toolActionButton!)
-        }
-        setItems(items, animated: false)
     }
     
-    /// setupActionButton
-    private func setupActionButton() {
-        
-    }
-    
-    /// hideActionButton
-    /// - Parameter hidden: Bool
-    internal func hideActionButton(_ hidden: Bool) {
-        guard let item = toolActionButton else { return }
-        switch (items, hidden) {
-        case (.some(let items), true) where items.contains(item) == true:
-            var items = items
-            items.removeAll(where: { $0 == item })
-            self.setItems(items, animated: false)
-        case (.some(let items), false) where items.contains(item) == false:
-            var items = items
-            items.append(item)
-            self.setItems(items, animated: false)
+    /// itemActionHandler
+    /// - Parameter sender: UIBarButtonItem
+    @objc private func itemActionHandler(_ sender: UIBarButtonItem) {
+        switch sender {
+        case shareItem:
+            delegate?.toolbar(self, shareActionHandler: sender)
+        case downloadItem:
+            delegate?.toolbar(self, downloadActionHandler: sender)
         default: break
         }
     }
     
-    /// hideDownloadButton
-    /// - Parameter hidden: Bool
-    internal func hideDownloadButton(_ hidden: Bool) {
-        guard let item = toolDownloadButton else { return }
-        switch (items, hidden) {
-        case (.some(let items), true) where items.contains(item) == true:
-            var items = items
-            items.removeAll(where: { $0 == item })
-            self.setItems(items, animated: false)
-        case (.some(let items), false) where items.contains(item) == false:
-            var items = items
-            items.append(item)
-            self.setItems(items, animated: false)
-        default: break
-        }
-    }
 }
 

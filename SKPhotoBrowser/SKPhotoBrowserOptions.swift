@@ -21,9 +21,6 @@ public struct SKPhotoBrowserOptions {
     public static var displayDownload: Bool = true
     /// Optional<String>
     public static var shareExtraCaption: Optional<String> = .none
-    /// Optional<[String]>
-    public static var actionButtonTitles: Optional<[String]> = .none
-    
     /// Bool
     public static var displayCounterLabel: Bool = true
     /// Bool
