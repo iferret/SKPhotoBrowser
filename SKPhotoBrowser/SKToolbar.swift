@@ -153,15 +153,16 @@ extension SKToolbar {
         switch actionKind {
         case .some(.share) where SKPhotoBrowserOptions.displayAction == true:
             toolbar.items = [.flexible(), shareItem]
+            loadingView?.stopAnimating()
         case .some(.download) where SKPhotoBrowserOptions.displayDownload == true:
             toolbar.items = [.flexible(), downloadItem]
+            loadingView?.stopAnimating()
         case .some(.loading):
             toolbar.items = [.flexible(), loadingItem]
-            if let customView: UIActivityIndicatorView = loadingItem.customView() {
-                customView.startAnimating()
-            }
+            loadingView?.startAnimating()
         default:
             toolbar.items = []
+            loadingView?.stopAnimating()
         }
     }
     
