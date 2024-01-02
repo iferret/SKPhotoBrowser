@@ -191,7 +191,7 @@ open class SKPhotoBrowser: UIViewController {
         DispatchQueue.main.async {[weak self] in
             guard let this = self, let page = this.pagingScrollView.pageDisplayingAtPhoto(photo), let photo = page.photo else { return }
             if photo.underlyingImage != nil {
-                page.displayImage(complete: true, reset: false)
+                page.displayImage(complete: true)
                 this.loadAdjacentPhotosIfNecessary(photo)
             } else {
                 page.displayImageFailure()
