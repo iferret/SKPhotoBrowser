@@ -130,6 +130,8 @@ open class SKPhotoBrowser: UIViewController {
     ///   - photos: [SKPhotoProtocol]
     ///   - initialPageIndex: Int
     public convenience init(photos: [SKPhotoProtocol], initialPageIndex: Int) {
+        // setup index
+        photos.enumerated().forEach { $0.element.index = $0.offset }
         self.init(nibName: nil, bundle: nil)
         self.photos = photos
         //self.photos.forEach { $0.checkCache() }

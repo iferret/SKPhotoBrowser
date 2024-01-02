@@ -12,13 +12,23 @@ import SKPhotoBrowserObjC
 #endif
 
 /// SKPhotoProtocol
-@objc public protocol SKPhotoProtocol: NSObjectProtocol {
+@objc public protocol SKPhotoProtocol: AnyObject {
     var index: Int { get set }
     var underlyingImage: Optional<UIImage> { get }
     var caption: Optional<String> { get }
     var contentMode: UIView.ContentMode { get set }
     func loadUnderlyingImageAndNotify()
     func checkCache()
+}
+
+extension SKPhotoProtocol {
+    
+    /// Int
+    internal var index: Int { 0 }
+    /// Optional<String>
+    internal var caption: Optional<String> { .none }
+    /// UIView.ContentMode
+    internal var contentMode: UIView.ContentMode { .scaleAspectFit }
 }
 
 // MARK: - SKPhoto
