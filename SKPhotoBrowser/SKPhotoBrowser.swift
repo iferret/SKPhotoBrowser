@@ -266,16 +266,20 @@ extension SKPhotoBrowser {
     /// - Parameters:
     ///   - image: UIImage
     ///   - size: CGSize
-    public func updateCloseButton(_ image: UIImage, size: Optional<CGSize> = .none) {
-        actionView.updateCloseButton(image: image, size: size)
+    public func updateCloseButton(_ image: Optional<UIImage>, 
+                                  size: Optional<CGSize> = .none,
+                                  imageEdgeInsets: Optional<UIEdgeInsets> = .none) {
+        actionView.updateCloseButton(image: image, size: size, imageEdgeInsets: imageEdgeInsets)
     }
     
     /// updateDeleteButton
     /// - Parameters:
     ///   - image: UIImage
     ///   - size:  Optional<CGSize>
-    public func updateDeleteButton(_ image: UIImage, size: Optional<CGSize> = .none) {
-        actionView.updateDeleteButton(image: image, size: size)
+    public func updateDeleteButton(_ image: Optional<UIImage>,
+                                   size: Optional<CGSize> = .none,
+                                   imageEdgeInsets: Optional<UIEdgeInsets> = .none) {
+        actionView.updateDeleteButton(image: image, size: size, imageEdgeInsets: imageEdgeInsets)
     }
     
 }

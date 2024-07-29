@@ -67,18 +67,18 @@ class SKActionView: UIView {
     
     /// updateCloseButton
     /// - Parameters:
-    ///   - image: UIImage
+    ///   - image: Optional<UIImage>
     ///   - size: CGSize
-    internal func updateCloseButton(image: UIImage, size: Optional<CGSize> = .none) {
-        configureCloseButton(image: image, size: size)
+    internal func updateCloseButton(image: Optional<UIImage>, size: Optional<CGSize> = .none, imageEdgeInsets: Optional<UIEdgeInsets> = .none) {
+        configureCloseButton(image: image, size: size, imageEdgeInsets: imageEdgeInsets)
     }
     
     /// updateDeleteButton
     /// - Parameters:
-    ///   - image: UIImage
+    ///   - image: Optional<UIImage>
     ///   - size: Optional<CGSize>
-    internal func updateDeleteButton(image: UIImage, size: Optional<CGSize> = .none) {
-        configureDeleteButton(image: image, size: size)
+    internal func updateDeleteButton(image: Optional<UIImage>, size: Optional<CGSize> = .none, imageEdgeInsets: Optional<UIEdgeInsets> = .none) {
+        configureDeleteButton(image: image, size: size, imageEdgeInsets: imageEdgeInsets)
     }
     
     /// animate
@@ -121,7 +121,9 @@ extension SKActionView {
     /// - Parameters:
     ///   - image: UIImage
     ///   - size: CGSize
-    internal func configureCloseButton(image: UIImage? = nil, size: CGSize? = nil) {
+    internal func configureCloseButton(image: Optional<UIImage> = .none,
+                                       size: Optional<CGSize> = .zero,
+                                       imageEdgeInsets: Optional<UIEdgeInsets> = .none) {
         if closeButton == nil {
             closeButton = SKCloseButton(frame: .zero)
             closeButton.addTarget(self, action: #selector(closeButtonPressed(_:)), for: .touchUpInside)
@@ -132,7 +134,10 @@ extension SKActionView {
             closeButton.setFrameSize(size)
         }
         if let image = image {
-            closeButton.setImage(image, for: .normal)
+            closeButton.setBackgroundImage(image, for: .normal)
+        }
+        if let imageEdgeInsets = imageEdgeInsets {
+            closeButton.imageEdgeInsets = imageEdgeInsets
         }
     }
     
@@ -140,7 +145,9 @@ extension SKActionView {
     /// - Parameters:
     ///   - image: UIImage
     ///   - size: CGSize
-    internal func configureDeleteButton(image: Optional<UIImage> = .none, size: Optional<CGSize> = .none) {
+    internal func configureDeleteButton(image: Optional<UIImage> = .none,
+                                        size: Optional<CGSize> = .none,
+                                        imageEdgeInsets: Optional<UIEdgeInsets> = .none) {
         if deleteButton == nil {
             deleteButton = SKDeleteButton(frame: .zero)
             deleteButton.addTarget(self, action: #selector(deleteButtonPressed(_:)), for: .touchUpInside)
@@ -152,6 +159,9 @@ extension SKActionView {
         }
         if let image = image {
             deleteButton.setImage(image, for: .normal)
+        }
+        if let imageEdgeInsets = imageEdgeInsets {
+            deleteButton.imageEdgeInsets = imageEdgeInsets
         }
     }
 }
