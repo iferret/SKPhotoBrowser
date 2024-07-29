@@ -106,7 +106,7 @@ open class SKPhotoBrowser: UIViewController {
         // animator.senderViewForAnimation = photos[currentPageIndex] as? UIView
         
         self.modalPresentationCapturesStatusBarAppearance = true
-        self.modalPresentationStyle = .overFullScreen
+        self.modalPresentationStyle = .custom
         self.modalTransitionStyle = .crossDissolve
         
         // add observer
