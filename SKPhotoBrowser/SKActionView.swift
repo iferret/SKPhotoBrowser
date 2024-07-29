@@ -134,7 +134,7 @@ extension SKActionView {
             closeButton.setFrameSize(size)
         }
         if let image = image {
-            closeButton.setImage(image, for: .normal)
+            closeButton.setBackgroundImage(image, for: .normal)
         }
         if let imageEdgeInsets = imageEdgeInsets {
             closeButton.imageEdgeInsets = imageEdgeInsets

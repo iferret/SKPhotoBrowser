@@ -39,7 +39,7 @@ class SKButton: UIButton {
         imageEdgeInsets = insets
         translatesAutoresizingMaskIntoConstraints = true
         autoresizingMask = [.flexibleBottomMargin, .flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin]
-        setImage(UIImage.bundledImage(named: imageName), for: .normal)
+        setBackgroundImage(UIImage.bundledImage(named: imageName), for: .normal)
     }
     
     /// setFrameSize
