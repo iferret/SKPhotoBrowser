@@ -15,7 +15,7 @@ class SKButton: UIButton {
     /// CGRect
     internal var hideFrame: CGRect = .zero
     /// UIEdgeInsets
-    fileprivate var insets: UIEdgeInsets {
+    internal var insets: UIEdgeInsets {
         if SKMesurement.isPhone {
             return UIEdgeInsets(top: 14.0, left: 14.0, bottom: 14.0, right: 14.0)
         } else {
@@ -81,6 +81,15 @@ class SKImageButton: SKButton {
 }
 
 class SKCloseButton: SKImageButton {
+    
+    /// UIEdgeInsets
+    internal override var insets: UIEdgeInsets {
+        if SKMesurement.isPhone {
+            return UIEdgeInsets(top: 8.0, left: 8.0, bottom: 8.0, right: 8.0)
+        } else {
+            return UIEdgeInsets(top: 7.0, left: 7.0, bottom: 7.0, right: 7.0)
+        }
+    }
     
     /// String
     internal override var imageName: String { return "btn_common_close_wh" }
